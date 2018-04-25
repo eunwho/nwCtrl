@@ -9,11 +9,11 @@
 		"frame": false,
 		"show": true,
 		"fullscreen": true,
-		"width": 1024,
-		"height": 768,
+		"width": 480,
+		"height": 320,
 		"position": "center",
-		"min_width": 1024,
-		"min_height": 768
+		"min_width": 480,
+		"min_height": 320
 	},
 	"repository": {
 		"type": "git",

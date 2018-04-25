@@ -1,4 +1,5 @@
 var oscope = (function() {
+
   var m_canvas;
   var m_context;
   var m_width;
@@ -6,12 +7,11 @@ var oscope = (function() {
   var m_h2;
   var m_trace = [];
   var m_voffset = [];
-  // these must match the initial values of the controls
-  // doh! no two way data bindind
+
   var mSecPerDiv		  		 = 0.100;
-  var m_samples_per_second = 600;
+  var m_samples_per_second = 450;
   var m_divisions          = 10;
-  var m_yscale             = 512;
+  var m_yscale             = 250;
   var m_sample_bits        = 10;
   var m_volts_per_div      = 5;
   var m_vrange             = 5;
@@ -23,27 +23,16 @@ var oscope = (function() {
   var m_text_size          = 12;
   var m_updates            = 0;
 
-  m_trace[0]           = null;
-  m_trace[1]           = null;
-  m_trace[2]           = null;
-  m_trace[3]           = null;
-  m_trace[4]           = null;
-  m_trace[5]           = null;
-  m_trace[6]           = null;
-  m_trace[7]           = null;
+  m_trace[0] = null;
+  m_trace[1] = null;
+  m_trace[2] = null;
+  m_trace[3] = null;
 
   m_voffset[0]         = 0;
   m_voffset[1]         = 0;
   m_voffset[2]         = 0;
   m_voffset[3]         = 0;
-  m_voffset[4]         = 0;
-  m_voffset[5]         = 0;
-  m_voffset[6]         = 0;
-  m_voffset[7]         = 0;
 
-  // ==============================================================
-  // background display scaffolding
-  // ==============================================================
   var outline_base = [
     [0.0,0.0],
     [1.0,0.0],
@@ -51,6 +40,7 @@ var oscope = (function() {
     [0.0,1.0],
     [0.0,0.0]
   ];
+
   var outline;
 
   var xaxis_base = [
@@ -66,6 +56,7 @@ var oscope = (function() {
   var mid_div_base = [
     0.0,5.0/10.0,1.0,5.0/10.0
   ];
+
   var mid_div = [0,0,0,0];
 
   var hgrid_base = [
@@ -77,8 +68,10 @@ var oscope = (function() {
     [0.0,6.0/10.0,1.0,6.0/10.0],
     [0.0,7.0/10.0,1.0,7.0/10.0],
     [0.0,8.0/10.0,1.0,8.0/10.0],
-    [0.0,9.0/10.0,1.0,9.0/10.0],
-  ];var hgrid;
+    [0.0,9.0/10.0,1.0,9.0/10.0]
+  ];
+
+	var hgrid;
 
   var vgrid_base = [
     [1.0/10.0,0.0,1.0/10.0,1.0],
@@ -91,22 +84,21 @@ var oscope = (function() {
     [8.0/10.0,0.0,8.0/10.0,1.0],
     [9.0/10.0,0.0,9.0/10.0,1.0]
   ];
-  var vgrid;
+  
+	var vgrid;
 
   var cursor_base = [
     [0.0,0.0,0.0,1.0],  // 0 horizontal
     [0.0,0.0,0.0,1.0],  // 1 horizontal
     [0.0,0.0,1.0,0.0],  // 2 vertical
-    [0.0,0.0,1.0,0.0],  // 3 vertical
+    [0.0,0.0,1.0,0.0]  // 3 vertical
   ];
-  var m_cursor;
 
-  // responsive sizes for canvas
-  // aspect ratio of available sizes needs to be 4 over 3
-  // and must fit the twitter boostrap grid size allocated
+	var m_cursor;
+
   var canvas_size = [
-    {width:600,height:450},
-    {width:400,height:300},
+    {width:450,height:250},
+    {width:400,height:200},
     {width:200,height:150}
   ];
 
@@ -118,10 +110,13 @@ var oscope = (function() {
   ];
 
   function getCanvasSize(window_height,parent_width,parent_height) {
+
     var r;
+
     if (window_height > parent_height) {
       parent_height = window_height;
     }
+
     var s = canvas_size.filter(function(v) {
       return ((v.width < parent_width)&&(v.height < parent_height));
     });
@@ -302,18 +297,16 @@ var oscope = (function() {
 	ctx.textAlign="left"; 
     ctx.fillStyle = "#01a9db";
     y = dy + 1;
-//     ctx.fillText('sec/div     = ' + (mSecPerDiv*1.0).toFixed(3) + '     dS = ' + m_cursor_seconds.toFixed(4),2,y);
     y += dy + 1;
-//    ctx.fillText('volts/div   = ' + m_volts_per_div.toFixed(4)   + '    dV = ' + m_cursor_volts.toFixed(4) ,2,y);
     y += dy + 22;
-    ctx.fillText('10kg/cm*2	'  ,2,y);
-    y += dy + 80;
+    ctx.fillText('10kg/cm*2'  ,2,y);
+    y += dy + 30;
     ctx.fillText('7.5',10,y);
-    y += dy + 77;
+    y += dy + 30;
     ctx.fillText('5.0',10,y);
-    y += dy + 77;
+    y += dy + 30;
     ctx.fillText('2.5',10,y);
-    y += dy + 77;
+    y += dy + 30;
     ctx.fillText('0.0',10,y);
     y += dy + 2;
     ctx.fillText('압력',10,y);
@@ -325,13 +318,13 @@ var oscope = (function() {
 
     y += dy + 22;
     ctx.fillText('   0',80,y);
-    y += dy + 80;
+    y += dy + 30;
     ctx.fillText('- 25',80,y);
-    y += dy + 77;
+    y += dy + 30;
     ctx.fillText('- 50',80,y);
-    y += dy + 77;
+    y += dy + 30;
     ctx.fillText('- 75',80,y);
-    y += dy + 77;
+    y += dy + 30;
     ctx.fillText('-100',80,y);
     y += dy + 2;
     ctx.fillText('진공',80,y);
@@ -342,17 +335,17 @@ var oscope = (function() {
     ctx.fillStyle = "yellow";
 
     y += dy + 22;
-    ctx.fillText('200C',580,y);
-    y += dy + 80;
-    ctx.fillText('150C',580,y);
-    y += dy + 77;
-    ctx.fillText('100C',580,y);
-    y += dy + 77;
-    ctx.fillText(' 50C',580,y);
-    y += dy + 77;
-    ctx.fillText('  0C',580,y);
+    ctx.fillText('200C',400,y);
+    y += dy + 30;
+    ctx.fillText('150C',400,y);
+    y += dy + 30;
+    ctx.fillText('100C',400,y);
+    y += dy + 30;
+    ctx.fillText(' 50C',400,y);
+    y += dy + 30;
+    ctx.fillText('  0C',400,y);
     y += dy + 2;
-    ctx.fillText('온도',580,y);
+    ctx.fillText('온도',400,y);
 
     ctx.lineWidth   = 4;
     t = (m_run) ? ("RUN : " + m_updates.toFixed(0)) : "STOP";
@@ -376,11 +369,7 @@ var oscope = (function() {
     var hs;
     var i;
 
-    // compute scale factors
-//    ys = computeVerticalScale(m_vrange,m_yscale,m_height,m_volts_per_div * 10);
     hs = computeHorizontalScale(mSecPerDiv*m_divisions,m_samples_per_second,m_width);
-
-    // compute horizonal scale
 
     ctx.save();
     ctx.translate(0,height);
@@ -389,66 +378,30 @@ var oscope = (function() {
     // set channel parameters
     switch(trace.channel) {
     case 0:
-			tempOffset = 25;
-	    ys = 450 / 250;
-      // ctx.translate(xaxis[0][0],xaxis[0][1] + voffset);
+		tempOffset = 0;
+	    ys = 1;
       ctx.strokeStyle = "yellow";
       break;
 
     case 1:
-			tempOffset = 1.25;
-			//tempOffset = 0.0;
-	    ys = 450 / 12.5; 
-      // ctx.translate(xaxis[1][0],xaxis[1][1] + voffset);
+			tempOffset = 10;
+	    ys = 1; 
       ctx.strokeStyle = "#2ECCFA";
       break;
 
     case 2:
-			tempOffset = 112.5;
-	    ys = 450 / 125 ; 
-      // ctx.translate(xaxis[1][0],xaxis[1][1] + voffset);
+			tempOffset = 1;
+	    ys = 1 ; 
       ctx.strokeStyle = "magenta";
       break;
 
     case 3:
-			tempOffset = 112.5;
-//	    ys = 450 / 0.125 * (-1); 
-	    ys = 450 / 125; 
-      // ctx.translate(xaxis[1][0],xaxis[1][1] + voffset);
+			tempOffset = 15;
+	    ys = 1; 
       ctx.strokeStyle = "white";
       break;
+	}
 
-    case 4:
-			tempOffset = 112.5;
-	    ys = 450 / 125 ; 
-      // ctx.translate(xaxis[1][0],xaxis[1][1] + voffset);
-      ctx.strokeStyle = "red";
-      break;
-
-    case 5:
-			tempOffset = 112.5;
-	    ys = 450 / 125 ; 
-      // ctx.translate(xaxis[1][0],xaxis[1][1] + voffset);
-      ctx.strokeStyle = "#FF8000";
-      break;
-
-    case 6:
-			tempOffset = 112.5;
-	    ys = 450 / 125 ; 
-      // ctx.translate(xaxis[1][0],xaxis[1][1] + voffset);
-      ctx.strokeStyle = "gray";
-      break;
-
-    case 7:
-			tempOffset = 112.5;
-	    ys = 450 / 125 ; 
-      // ctx.translate(xaxis[1][0],xaxis[1][1] + voffset);
-      ctx.strokeStyle = "purple";
-      break;
-    }
-    
-    // scale the trace y axis
-    // samples are Int16Array
     for(i=0;i<trace.length;++i) {
       t.push([i*hs,((trace.sample[i])*1+tempOffset) * ys]);
     }
@@ -474,10 +427,6 @@ var oscope = (function() {
       m_trace[1] = trace[1];
       m_trace[2] = trace[2];
       m_trace[3] = trace[3];
-      m_trace[4] = trace[4];
-      m_trace[5] = trace[5];
-      m_trace[6] = trace[6];
-      m_trace[7] = trace[7];
     }
 
     // draw last traces
@@ -492,22 +441,6 @@ var oscope = (function() {
     }
     if (m_trace[3] !== null) {
       drawTrace(m_context, m_trace[3], m_width, m_height, m_voffset[3]);
-    }
-
-    if (m_trace[4] !== null) {
-      drawTrace(m_context, m_trace[4], m_width, m_height, m_voffset[4]);
-    }
-
-    if (m_trace[5] !== null) {
-      drawTrace(m_context, m_trace[5], m_width, m_height, m_voffset[5]);
-    }
-
-    if (m_trace[6] !== null) {
-      drawTrace(m_context, m_trace[6], m_width, m_height, m_voffset[6]);
-    }
-
-    if (m_trace[7] !== null) {
-      drawTrace(m_context, m_trace[7], m_width, m_height, m_voffset[7]);
     }
 
     // draw text annotations
@@ -576,7 +509,7 @@ var oscope = (function() {
       // rate is in samples/second
       m_samples_per_second = samples_per_second;
     }
-    onPaint(null);0.
+    onPaint(null);
   }
 
   /**
@@ -642,10 +575,6 @@ var oscope = (function() {
     onPaint(null);
   }
 
-	//--- invert code table create
-  function createCodeTable(arg1) {
-  }
-
   return {
     init               : onInit,
     onResize           : onResize,
@@ -659,9 +588,6 @@ var oscope = (function() {
     onCursorMove       : onCursorMove,
     onCursorSelect     : onCursorSelect,
     onRunStop          : onRunStop,
-		createCodeTable		 : createCodeTable
   };
 
 })();
-
-
