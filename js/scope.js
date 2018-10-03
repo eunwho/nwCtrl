@@ -1,8 +1,8 @@
-var oscope = (function() {
+var scope = (function() {
   var m_canvas;
   var m_context;
-  var m_width;
-  var m_height;
+  var m_width = 600;
+  var m_height = 450;
   var m_h2;
   var m_trace = [];
   var m_voffset = [];
@@ -32,16 +32,6 @@ var oscope = (function() {
   m_trace[6]           = null;
   m_trace[7]           = null;
 
-/*
-  m_voffset[0]         = 177;
-  m_voffset[1]         = 132;
-  m_voffset[2]         = 88;
-  m_voffset[3]         = 42;
-  m_voffset[4]         = -2;
-  m_voffset[5]         = -48;
-  m_voffset[6]         = -90;
-  m_voffset[7]         = -138;
-*/
   m_voffset[0]         = 0;
   m_voffset[1]         = 0;
   m_voffset[2]         = 0;
@@ -73,9 +63,7 @@ var oscope = (function() {
   var vdiv_base  =  1.0/10.0;
   var vdiv;
 
-  var mid_div_base = [
-    0.0,5.0/10.0,1.0,5.0/10.0
-  ];
+  var mid_div_base = [0.0,5.0/10.0,1.0,5.0/10.0];
   var mid_div = [0,0,0,0];
 
   var hgrid_base = [
@@ -88,7 +76,9 @@ var oscope = (function() {
     [0.0,7.0/10.0,1.0,7.0/10.0],
     [0.0,8.0/10.0,1.0,8.0/10.0],
     [0.0,9.0/10.0,1.0,9.0/10.0],
-  ];var hgrid;
+  ];
+	
+  var hgrid;
 
   var vgrid_base = [
     [1.0/10.0,0.0,1.0/10.0,1.0],
@@ -111,9 +101,6 @@ var oscope = (function() {
   ];
   var m_cursor;
 
-  // responsive sizes for canvas
-  // aspect ratio of available sizes needs to be 4 over 3
-  // and must fit the twitter boostrap grid size allocated
   var canvas_size = [
     {width:600,height:450},
     {width:400,height:300},
@@ -127,38 +114,6 @@ var oscope = (function() {
       6
   ];
 
-  function getCanvasSize(window_height,parent_width,parent_height) {
-    var r;
-    if (window_height > parent_height) {
-      parent_height = window_height;
-    }
-    var s = canvas_size.filter(function(v) {
-      return ((v.width < parent_width)&&(v.height < parent_height));
-    });
-
-    // if nothing matches
-    if (s.length <= 0) {
-      // use the smallest
-      r = s[2];
-    }
-    else {
-      // use first fit
-      r = s[0];
-    }
-
-    return r;
-  }
-
-  function getTextSize(width) {
-    var s;
-
-    s = canvas_size.reduce(function(p,v,i) {
-      return (width <= v.width) ? text_size[i] : p;
-    },text_size[2]);
-
-    return s;
-  }
-
   function rescale(w,h) {
     // rescale horizontal divisions
     hgrid = hgrid_base.map(function (v) {
@@ -169,7 +124,6 @@ var oscope = (function() {
       d[3] = v[3] * h;
       return d;
     });
-
 
     // rescale vertical division size
     vdiv = vdiv_base * h;
@@ -221,7 +175,7 @@ var oscope = (function() {
   }
 
   function clear(ctx,width,height) {
-    ctx.fillStyle = "black";
+    ctx.fillStyle = "white";
     ctx.fillRect(0,0,width,height);
   }
 
@@ -258,14 +212,16 @@ var oscope = (function() {
 
     // draw the outline
     ctx.save();
-    ctx.strokeStyle = 'gray';
+//    ctx.strokeStyle = 'gray';
+    ctx.strokeStyle = 'black';
     ctx.lineWidth   = 6;
     drawPath(ctx,outline);
     ctx.restore();
 
     // draw the grid
     ctx.save();
-    ctx.strokeStyle = "rgba(255,255,255,0.5)";
+//    ctx.strokeStyle = "rgba(255,255,255,0.5)";
+    ctx.strokeStyle = "rgba(0,0,0,0.5)";
     ctx.lineWidth   = 1;
     ctx.setLineDash([1,1]);
     drawLines(ctx,hgrid);
@@ -308,60 +264,63 @@ var oscope = (function() {
     var y;
 
     ctx.font = dy.toFixed(0) + "px monospace";
+
+	ctx.textAlign="left"; 
     ctx.fillStyle = "#01a9db";
     y = dy + 1;
 //     ctx.fillText('sec/div     = ' + (mSecPerDiv*1.0).toFixed(3) + '     dS = ' + m_cursor_seconds.toFixed(4),2,y);
     y += dy + 1;
 //    ctx.fillText('volts/div   = ' + m_volts_per_div.toFixed(4)   + '    dV = ' + m_cursor_volts.toFixed(4) ,2,y);
     y += dy + 22;
-    ctx.fillText('  6.0kg/cm*2	'  ,2,y);
+    ctx.fillText('10kg/cm*2	'  ,2,y);
     y += dy + 80;
-    ctx.fillText('  4.5	'  ,2,y);
+    ctx.fillText('7.5',10,y);
     y += dy + 77;
-    ctx.fillText('  3.0	'  ,2,y);
+    ctx.fillText('5.0',10,y);
     y += dy + 77;
-    ctx.fillText('  1.5	'  ,2,y);
+    ctx.fillText('2.5',10,y);
     y += dy + 77;
-    ctx.fillText('  0.0 '  ,2,y);
+    ctx.fillText('0.0',10,y);
     y += dy + 2;
-    ctx.fillText('  압력	'  ,2,y);
+    ctx.fillText('압력',10,y);
 
 
     y = dy + 1;
     y += dy + 1;
-    ctx.fillStyle = "white";
+    ctx.fillStyle = "black";
 
     y += dy + 22;
-    ctx.fillText('              0	'  ,2,y);
+    ctx.fillText('   0',80,y);
     y += dy + 80;
-    ctx.fillText('            -0.025	'  ,2,y);
+    ctx.fillText('- 25',80,y);
     y += dy + 77;
-    ctx.fillText('            -0.05	'  ,2,y);
+    ctx.fillText('- 50',80,y);
     y += dy + 77;
-    ctx.fillText('            -0.075	'  ,2,y);
+    ctx.fillText('- 75',80,y);
     y += dy + 77;
-    ctx.fillText('             -0.1	'  ,2,y);
+    ctx.fillText('-100',80,y);
     y += dy + 2;
-    ctx.fillText('             진공	'  ,2,y);
+    ctx.fillText('진공',80,y);
 
+	ctx.textAlign="right"; 
     y = dy + 1;
     y += dy + 1;
-    ctx.fillStyle = "yellow";
+    ctx.fillStyle = "green";
 
     y += dy + 22;
-    ctx.fillText('																																																																																												200C	'  ,2,y);
+    ctx.fillText('200C',580,y);
     y += dy + 80;
-    ctx.fillText('                               																																																													150C	'  ,2,y);
+    ctx.fillText('150C',580,y);
     y += dy + 77;
-    ctx.fillText('                                 																																																											100C	'  ,2,y);
+    ctx.fillText('100C',580,y);
     y += dy + 77;
-    ctx.fillText('     																																																																																								50C	'  ,2,y);
+    ctx.fillText(' 50C',580,y);
     y += dy + 77;
-    ctx.fillText('                                                                              																0C	'  ,2,y);
+    ctx.fillText(' 0C',580,y);
     y += dy + 2;
-    ctx.fillText('                     		                          																																												온도	'  ,2,y);
+    ctx.fillText('온도',580,y);
 
-
+    ctx.lineWidth   = 4;
     t = (m_run) ? ("RUN : " + m_updates.toFixed(0)) : "STOP";
     ctx.fillStyle = (m_run) ? 'lime' : 'red';
     ctx.fillText(t,2,height-4);
@@ -399,56 +358,56 @@ var oscope = (function() {
 			tempOffset = 25;
 	    ys = 450 / 250;
       // ctx.translate(xaxis[0][0],xaxis[0][1] + voffset);
-      ctx.strokeStyle = "yellow";
+      ctx.strokeStyle = "green";
       break;
 
     case 1:
-			tempOffset = 0.75;
+			tempOffset = 1.25;
 			//tempOffset = 0.0;
-	    ys = 450 / 7.5; 
+	    ys = 450 / 12.5; 
       // ctx.translate(xaxis[1][0],xaxis[1][1] + voffset);
       ctx.strokeStyle = "#2ECCFA";
       break;
 
     case 2:
-			tempOffset = 0.1125;
-	    ys = 450 / 0.125 ; 
+			tempOffset = 112.5;
+	    ys = 450 / 125 ; 
       // ctx.translate(xaxis[1][0],xaxis[1][1] + voffset);
       ctx.strokeStyle = "magenta";
       break;
 
     case 3:
-			tempOffset = 0.1125;
+			tempOffset = 112.5;
 //	    ys = 450 / 0.125 * (-1); 
-	    ys = 450 / 0.125; 
+	    ys = 450 / 125; 
       // ctx.translate(xaxis[1][0],xaxis[1][1] + voffset);
       ctx.strokeStyle = "white";
       break;
 
     case 4:
-			tempOffset = 0.1125;
-	    ys = 450 / 0.125 ; 
+			tempOffset = 112.5;
+	    ys = 450 / 125 ; 
       // ctx.translate(xaxis[1][0],xaxis[1][1] + voffset);
       ctx.strokeStyle = "red";
       break;
 
     case 5:
-			tempOffset = 0.1125;
-	    ys = 450 / 0.125 ; 
+			tempOffset = 112.5;
+	    ys = 450 / 125 ; 
       // ctx.translate(xaxis[1][0],xaxis[1][1] + voffset);
       ctx.strokeStyle = "#FF8000";
       break;
 
     case 6:
-			tempOffset = 0.1125;
-	    ys = 450 / 0.125 ; 
+			tempOffset = 112.5;
+	    ys = 450 / 125 ; 
       // ctx.translate(xaxis[1][0],xaxis[1][1] + voffset);
       ctx.strokeStyle = "gray";
       break;
 
     case 7:
-			tempOffset = 0.1125;
-	    ys = 450 / 0.125 ; 
+			tempOffset = 112.5;
+	    ys = 450 / 125 ; 
       // ctx.translate(xaxis[1][0],xaxis[1][1] + voffset);
       ctx.strokeStyle = "purple";
       break;
@@ -519,6 +478,7 @@ var oscope = (function() {
 
     // draw text annotations
     drawAnnotations(m_context,m_width,m_height,m_text_size);
+	 writeLegend(); 
   }
 
   function onSampleBits(bits) {
@@ -628,30 +588,81 @@ var oscope = (function() {
     m_run = run;
   }
 
-  function onResize() {
-    var parent = $("#oscope-parent");
-    var size = getCanvasSize($(window).height(),parent.width(),parent.height());
-    m_text_size = getTextSize(size.width);
-    m_canvas = $("#oscope")[0];
-    m_width  = m_canvas.width  = size.width;
-    m_height = m_canvas.height = size.height;
+  function onResize(canvas) {
+
+    // var parent = $("#test-parent");
+    // var size = getCanvasSize($(window).height(),parent.width(),parent.height());
+    // m_text_size = getTextSize(size.width);
+    m_text_size = 12; // getTextSize(size.width);
+
+    m_canvas = canvas;
+    //m_width  = m_canvas.width  = size.width;
+    //m_height = m_canvas.height = size.height;
+    m_width  = m_canvas.width  = 600;
+    m_height = m_canvas.height = 450;
     m_h2     = m_height / 2;
     rescale(m_width,m_height);
     onPaint(null);
   }
 
-  function onInit() {
-    m_canvas  = $("#oscope")[0];
+	function writeTime(start, end){
+
+	   m_context.fillStyle = "black";
+		
+		m_context.textAlign="left"; 
+	   m_context.fillText(start,10,20);
+		m_context.textAlign="right"; 
+	   m_context.fillText(end,590,20);
+	}
+
+	function writeLegend( ){
+
+		var x = 50;
+		var delta_x = 70;
+
+		m_context.textAlign="left"; 
+
+	   m_context.fillStyle = "green";		
+	   m_context.fillText('온도',x,40);
+		
+		x = x+ delta_x;
+	   m_context.fillStyle = "#2ECCFA";		
+	   m_context.fillText('압력',x,40);
+		
+		x = x+ delta_x;
+	   m_context.fillStyle = "magenta";		
+	   m_context.fillText('진공1',x,40);
+		
+		x = x+ delta_x;
+	   m_context.fillStyle = "black";		
+	   m_context.fillText('진공2',x,40);
+		
+		x = x+ delta_x;
+	   m_context.fillStyle = "red";		
+	   m_context.fillText('진공3',x,40);
+		
+		x = x+ delta_x;
+	   m_context.fillStyle = "#FF8000";		
+	   m_context.fillText('진공4',x,40);
+		
+		x = x+ delta_x;
+	   m_context.fillStyle = "darkgray";		
+	   m_context.fillText('진공5',x,40);				
+
+		x = x+ delta_x;
+	   m_context.fillStyle = "purple";		
+	   m_context.fillText('진공6',x,40);				
+	}
+
+  function onInit(canvas) {
+    m_canvas  = canvas;
     m_context = m_canvas.getContext("2d");
     // attach resize event
-    $(window).resize(onResize);
-    onResize();
+    // $(window).resize(onResize);
+    onResize(canvas);
     onPaint(null);
-  }
+ }
 
-	//--- invert code table create
-  function createCodeTable(arg1) {
-  }
 
   return {
     init               : onInit,
@@ -666,139 +677,9 @@ var oscope = (function() {
     onCursorMove       : onCursorMove,
     onCursorSelect     : onCursorSelect,
     onRunStop          : onRunStop,
-		createCodeTable		 : createCodeTable
+	 writeTime			  : writeTime 
   };
 
 })();
 
 
-//--- start the client application
-
-const dataLength = 600;
-
-var traceCount = 0;
-
-var traceData0 = { channel:0,length:dataLength,sample:[dataLength]}
-var traceData1 = { channel:1,length:dataLength,sample:[dataLength]}
-var traceData2 = { channel:2,length:dataLength,sample:[dataLength]}
-var traceData3 = { channel:3,length:dataLength,sample:[dataLength]}
-var traceData4 = { channel:4,length:dataLength,sample:[dataLength]}
-var traceData5 = { channel:5,length:dataLength,sample:[dataLength]}
-var traceData6 = { channel:6,length:dataLength,sample:[dataLength]}
-var traceData7 = { channel:7,length:dataLength,sample:[dataLength]}
-
-var trace =[traceData0,traceData1,traceData2,traceData3,traceData4,traceData5,traceData6,traceData7];
- 
-var adcValue = [0,0,0,0,0,0,0,0];
-
-var noVac = 1;
-
-var socket = io.connect();
-var messages = 0;
-/*
-socket.on('trace', function (msg) {
-  traceData0.sample[traceCount] = msg.channel[0];
-  traceData1.sample[traceCount] = msg.channel[1];
-  traceData2.sample[traceCount] = msg.channel[2];
-  traceData3.sample[traceCount] = msg.channel[3];
-  traceData4.sample[traceCount] = msg.channel[4];
-  traceData5.sample[traceCount] = msg.channel[5];
-  traceData6.sample[traceCount] = msg.channel[6];
-  traceData7.sample[traceCount] = msg.channel[7];
-
-	$('#gauge0').attr('data-value', (msg.channel[0]));
-	$('#gauge1').attr('data-value', (msg.channel[1]));
-	$('#gauge2').attr('data-value', (msg.channel[2]));
-	$('#gauge3').attr('data-value', (msg.channel[3]));
-	$('#gauge4').attr('data-value', (msg.channel[4]));
-	$('#gauge5').attr('data-value', (msg.channel[5]));
-	$('#gauge6').attr('data-value', (msg.channel[6]));
-	$('#gauge7').attr('data-value', (msg.channel[7]));
-
-	if(msg.state == 0 ){
-    var target = document.getElementById('stater');
-		target.innerHTML ='대기중';    
-		$('stater').removeClass('csStateLampRunning');
-		$('stater').addClass('csStateLampReady');
-	}else{
-    var target = document.getElementById('stater');
-		target.innerHTML ='동작중';
-		$('stater').removeClass('csStateLampReady');
-		$('stater').addClass('csStateLampRunning');
-	}	
-	//console.log(msg);
-	traceCount = (traceCount > 599) ? 0 : traceCount+1;
-  oscope.onPaint(trace);
-});
-
-socket.on('graph', function (msg) {
-	console.log(msg);
-});
-
-socket.on('noVacTx',function(msg){
-    noVac = msg.selVac;
-    document.getElementById('idVacRec').innerHTML = noVac;    
-});
-
-
-socket.on('vacuum', function (msg) {
-});
-
-socket.on('codeTable', function (msg) {
-  oscope.createCodeTable(msg);
-});
-
-socket.on('disconnect',function() {
-  console.log('disconnected');
-});
-*/
-
-function radialGaugeInit(){
-
-	var degreePerCelcius = '\xB0'+'C';
-
-//	$('#gauge1').attr('data-units','Mpa');
-//	$('#gauge2').attr('data-units','Mpa');
-//	$('#gauge3').attr('data-units','Mpa');
-//	$('#gauge4').attr('data-units','Mpa');
-//	$('#gauge5').attr('data-units','Mpa');
-//	$('#gauge6').attr('data-units','Mpa');
-
-//	$('#gauge'+gaugeNumber).attr('data-max-value',"0.2");
-//	$('#gauge'+gaugeNumber).attr('data-major-ticks',"[-0.1,-0.05,0,0.05,0.1, 0.15, 0.2]");
-	//$('#gauge'+gaugeNumber).attr('data-minor-ticks',"0.02");
-	
-}
-
-
-
-
-
-$("document").ready(function() {
-  if (oscope) {
-    oscope.init();
-  }
-	var dummy = {0:0};
-//	radialGaugeInit();
-//	gauge();
-//	document.body.appendChild(gauge.options.renderTo);
-//	socket.emit('codeTable',dummy);
-});
-
-
-
-
-
-
-
-
-
-
-/*
-setInterval( function () {
-	var date = new Date();
-	var n = date.toDateString();
-	var time = date.toLocaleTimeString();
-  document.getElementById('clock1').innerHTML = n +':'+ time;
-}, 2000);
-*/

@@ -1,6 +1,9 @@
 //"use strict";
 
 const dataLength = 600;
+
+var scopeImage = document.createElement('canvas');
+var graphStartTime;
 var traceCount = 0;
 var traceData0 = { channel:0,length:dataLength,sample:[dataLength]}
 var traceData1 = { channel:1,length:dataLength,sample:[dataLength]}
@@ -142,7 +145,7 @@ function getFileName(){
 	}	else temp = 1;
 
 	var textOut = "fileNumber:"+temp;
-	fs.writeFileSync(tFs,textOut, 'utf8');  
+	// fs.writeFileSync(tFs,textOut, 'utf8');  
 
 	return ( 'record'+temp+'.dat');
 }
@@ -247,6 +250,7 @@ setInterval(function() {
 					// myEmitter.emit('event', startTime );
 					machineState = 0; // machine ready
 					recordState = 0;
+					saveGraph();
 				} 
 			}else{
 				machineState = 0;
@@ -256,36 +260,32 @@ setInterval(function() {
 			if( recordState == 0 ){
 				recordCount = 0;
 				recordState = 1;
+
 			   startTime = new Date();
+				graphStartTime = new Date();
+
+				for( var i = 0 ; i < 600 ; i ++){
+
+					traceData0.sample[i] = 0;
+					traceData1.sample[i] = 0;
+					traceData2.sample[i] = 0;
+					traceData3.sample[i] = 0;
+					traceData4.sample[i] = 0;
+					traceData5.sample[i] = 0;
+					traceData6.sample[i] = 0;
+					traceData7.sample[i] = 0;
+				}
+				traceCount = 0;
+
    			var n = startTime.toDateString();
    			var time = startTime.toLocaleTimeString();
   				document.getElementById('startTimeStamp').innerHTML = n +':'+ time;
-				dataFileName = getFileName();				
-				// console.log('dataFileName = ', dataFileName);				
-
-				var dataOut = '=======================================\r\n';
-		      fs.appendFileSync(dataFileName,dataOut,'utf8');
-
-				var dataOut = '    일성화이바 오토크레브 동작 데이터 \r\n';
-		      fs.appendFileSync(dataFileName,dataOut,'utf8');
-
-				var dataOut = '시작시간 =' + n + ':'+ time + '\r\n';
-		      fs.appendFileSync(dataFileName,dataOut,'utf8');
-
-				var dataOut = '=======================================\r\n';
-		      fs.appendFileSync(dataFileName,dataOut,'utf8');
-
-				var dataOut = '번호\t온도\t압력\t진공1\t진공2\t진공3\t진공4\t진공5\t진공6 \r\n';
-		      fs.appendFileSync(dataFileName,dataOut,'utf8');
 			}
 			recordCount ++;
 			var dataOut =  recordCount +'\t';
 			for( i = 0; i < 8 ; i++){
 				dataOut += traceData.channel[i] + '\t';
 			}	
-
-			dataOut +='\r\n';			
-	      fs.appendFileSync(dataFileName,dataOut,'utf8');
 			machineState = 1;	// machine running
 			recordSate = 1;
 	   } 
@@ -425,7 +425,27 @@ setInterval(function() {
    var time = date.toLocaleTimeString();
 	document.getElementById('clock1').innerHTML = n +':'+ time;
    //console.log(msg);
-   traceCount = (traceCount > 599) ? 0 : traceCount+1;
+   // traceCount = (traceCount > 599) ? 0 : traceCount+1;
+
+	if( traceCount > 599 ){
+		traceCount = 0;
+		if( machineState == 1){			// machine running
+
+//--- save image
+
+			saveGraphImage();
+			graphStartTime = new Date(); 
+
+
+
+		}
+	} else {
+		traceCount ++;
+	}	
+
+
+//--- end of print graph
+
 	oscope.onPaint(trace);
 
 },1000);
@@ -462,7 +482,51 @@ function btnEmg(){
 */
 }
 
+
 function btnStart(){
+	saveGraphImage();
+}
+
+function saveGraphImage(){
+	try{
+
+  	var startDateString = graphStartTime.toDateString();
+  	var startClock = graphStartTime.toLocaleTimeString();
+	var start = "[ START = " + startDateString +':'+ startClock +" ]";
+
+  	var endTime = new Date();
+  	var endDateString = endTime.toDateString();
+  	var endClock = endTime.toLocaleTimeString();
+	var end = "[ END = " + endDateString +':'+ endClock +" ]";
+
+	scope.onPaint(trace);
+	scope.writeTime(start,end);
+
+
+  	var dataUrl = scopeImage.toDataURL();
+	var buffer = new Buffer(dataUrl.split(",")[1], 'base64');
+
+	var month = ( (month = graphStartTime.getMonth() + 1)<10)? '_0'+month: '_'+month;
+	var day =  ( (day = graphStartTime.getDate()) < 10 ) ? '0'+ day : day;
+
+	var Hour = ( ( Hour = graphStartTime.getHours()) < 10 ) ? '_0'+ Hour : '_'+ Hour;
+	var Minute = graphStartTime.getMinutes()+".png";
+
+	var endMonth = ( (endMonth = endTime.getMonth() + 1)<10)? '_0'+endMonth: '_'+endMonth;
+	var endDay =  ( (endDay = endTime.getDate()) < 10 ) ? '0'+ endDay : endDay;
+
+	var endHour = ( ( endHour = endTime.getHours()) < 10 ) ? '_0'+ endHour : '_'+ endHour;
+	var endMinute = endTime.getMinutes()+".png";
+
+	// var fileName = graphStartTime.getFullYear()+ month + day + Hour + Minute;
+	var fileName = 'graph/'+endTime.getFullYear()+ endMonth + endDay + endHour + endMinute;
+	// console.log( "fileName_test = " + fileName_test);
+	fs.writeFileSync(fileName,buffer,'base64');
+	buffer = null;
+
+	} catch(e){
+		console.log(e);
+	}
 }
 
 function btnRestart(){
@@ -584,6 +648,13 @@ function errMsgOut(input){
 
 $("document").ready(function() {
    if (oscope) oscope.init();
+
+	scopeImage = document.createElement('canvas');
+	scopeImage.id = "test";
+	scopeImage.width = 600;
+	scopeImage.hight = 450;
+
+	scope.init(scopeImage);
 
    for(i = 1 ; i<9 ; i ++){
       var gId = 'rGauge' + i;  
