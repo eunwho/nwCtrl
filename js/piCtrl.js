@@ -432,23 +432,17 @@ setInterval(function() {
 		if( machineState == 1){			// machine running
 
 //--- save image
-
 			saveGraphImage();
 			graphStartTime = new Date(); 
-
-
-
 		}
 	} else {
 		traceCount ++;
 	}	
-
-
 //--- end of print graph
 
 	oscope.onPaint(trace);
 
-},1000);
+},2000);
 
 var exec = require('child_process').exec;
 
@@ -481,7 +475,6 @@ function btnEmg(){
 /*
 */
 }
-
 
 function btnStart(){
 	saveGraphImage();
@@ -516,7 +509,7 @@ function saveGraphImage(){
 	var endDay =  ( (endDay = endTime.getDate()) < 10 ) ? '0'+ endDay : endDay;
 
 	var endHour = ( ( endHour = endTime.getHours()) < 10 ) ? '_0'+ endHour : '_'+ endHour;
-	var endMinute = endTime.getMinutes()+".png";
+	var endMinute = (( endMinute = endTime.getMinutes()) < 10 ) ? '0'+ endMinute +".png" : endMinute+".png";
 
 	// var fileName = graphStartTime.getFullYear()+ month + day + Hour + Minute;
 	var fileName = 'graph/'+endTime.getFullYear()+ endMonth + endDay + endHour + endMinute;
