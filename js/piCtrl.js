@@ -306,7 +306,12 @@ setInterval(function() {
 				motorError++;
 				var textOut ='모터 과부하 트립 : 팬모타, 유압모터, 수중모터';
 				var d = new Date()+':\t'+textOut+'\r\n';
-		      fs.appendFileSync(tripLogFileName,d,'utf8');
+		      fs.appendFileSync(tripLogFileName,d,'utf8',function(err){
+					if (err) {
+						console.log('Err appendFileSync() :'+ err);
+        				throw 'could not open file: ' + err;
+    				}
+				});
 				errMsgOut(d);
 			} 
 		}
@@ -319,7 +324,12 @@ setInterval(function() {
 				heatErro++;
 				var textOut ='온도제어기 트립발생';
 				var d = new Date()+':\t'+textOut+'\r\n';
-		      fs.appendFileSync(tripLogFileName,d,'utf8');
+		      fs.appendFileSync(tripLogFileName,d,'utf8',function(err){
+					if (err) {
+						console.log('Err appendFileSync() tripLogFile : '+ err);
+        				throw 'could not open file: ' + err;
+    				}
+				});
 				errMsgOut(d);
 			}
 		}
@@ -332,7 +342,12 @@ setInterval(function() {
 				flowSensErro++;
 				var textOut ='플로센서 이상 발생';
 				var d = new Date()+':\t'+textOut+'\r\n';
-		      fs.appendFileSync(tripLogFileName,d,'utf8');
+		      fs.appendFileSync(tripLogFileName,d,'utf8',function(err){
+					if (err) {
+						console.log('Err appendFileSync() :'+ err);
+        				throw 'could not open file: ' + err;
+    				}
+				});
 				errMsgOut(d);
 			}
 		}
@@ -481,6 +496,7 @@ function btnStart(){
 }
 
 function saveGraphImage(){
+
 	try{
 
   	var startDateString = graphStartTime.toDateString();
@@ -514,7 +530,12 @@ function saveGraphImage(){
 	// var fileName = graphStartTime.getFullYear()+ month + day + Hour + Minute;
 	var fileName = 'graph/'+endTime.getFullYear()+ endMonth + endDay + endHour + endMinute;
 	// console.log( "fileName_test = " + fileName_test);
-	fs.writeFileSync(fileName,buffer,'base64');
+	fs.writeFileSync(fileName,buffer,'base64',function(err){
+		if(err){
+			console.log('Err writeFileSync saveGraphImage() : '+err);
+			throw 'could not open file : ' +err;
+		}	
+	});
 	buffer = null;
 
 	} catch(e){
@@ -670,6 +691,19 @@ $("document").ready(function() {
 
 });
 
+/*
+process.on('unhandledRejection', (reason, promise) => {
+  console.log('Unhandled Rejection at:', reason.stack || reason)
+  // Recommended: send the information to sentry.io
+  // or whatever crash reporting service you use
+});
+*/
+
+process.on('unhandledRejection', function(reason, p){
+  console.log('Unhandled Rejection at:', p, 'reason:', reason);
+  // application specific logging, throwing an error, or other logic here
+});
+
 process.on('SIGTERM', function () {
     process.exit(0);
 });
@@ -678,6 +712,7 @@ process.on('SIGINT', function () {
     process.exit(0);
 });
  
+
 process.on('exit', function () {
     console.log('\nShutting down, performing GPIO cleanup');
     rpio.spiEnd();
