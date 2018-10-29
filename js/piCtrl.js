@@ -704,6 +704,7 @@ process.on('unhandledRejection', function(reason, p){
   // application specific logging, throwing an error, or other logic here
 });
 
+/*
 process.on('SIGTERM', function () {
     process.exit(0);
 });
@@ -711,8 +712,7 @@ process.on('SIGTERM', function () {
 process.on('SIGINT', function () {
     process.exit(0);
 });
- 
-
+*/
 process.on('exit', function () {
     console.log('\nShutting down, performing GPIO cleanup');
     rpio.spiEnd();
