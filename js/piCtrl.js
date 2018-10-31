@@ -128,28 +128,6 @@ var readMcp23017 = function(address,port){
   });
 }
 
-// 0: ready 1: runing 2: trip
-function getFileName(){
-	var tFs = "./piCtrl.conf";
-
-	//var testOut = "fileNumber:10";
-	//var temp = fs.readFileSync(tFs,'utf8');  
-	//var test = temp.split(':');
-
-	var readText = fs.readFileSync(tFs,'utf8');  
-	var test = readText.split(':');
-	var temp = test[1] * 1;
-	
-	if( (temp > 0) && (temp < 100) ){
-		( temp == 100 )? temp = 1: temp ++;
-	}	else temp = 1;
-
-	var textOut = "fileNumber:"+temp;
-	// fs.writeFileSync(tFs,textOut, 'utf8');  
-
-	return ( 'record'+temp+'.dat');
-}
-
 function getElapedTime(count){
 	var second = count /1000;
 	var hour = Math.floor( second / 3600 );
@@ -158,6 +136,7 @@ function getElapedTime(count){
 
 	return (':'+hour +'시간:' +min +'분:'+sec+'초 동작함');
 }
+
 var msgBoxCount=0;
 
 var motorError=0;
@@ -250,7 +229,7 @@ setInterval(function() {
 					// myEmitter.emit('event', startTime );
 					machineState = 0; // machine ready
 					recordState = 0;
-					saveGraph();
+					saveGraphImage(dataFileName);  
 				} 
 			}else{
 				machineState = 0;
@@ -261,11 +240,9 @@ setInterval(function() {
 				recordCount = 0;
 				recordState = 1;
 
-			   startTime = new Date();
 				graphStartTime = new Date();
 
 				for( var i = 0 ; i < 600 ; i ++){
-
 					traceData0.sample[i] = 0;
 					traceData1.sample[i] = 0;
 					traceData2.sample[i] = 0;
@@ -277,15 +254,39 @@ setInterval(function() {
 				}
 				traceCount = 0;
 
+			   startTime = new Date();
    			var n = startTime.toDateString();
    			var time = startTime.toLocaleTimeString();
+
   				document.getElementById('startTimeStamp').innerHTML = n +':'+ time;
+				dataFileName = getFileName()+".dat";				
+
+				var dataOut = '=======================================\r\n';
+		      fs.writeFileSync(dataFileName,dataOut,'utf8');
+
+				var dataOut = '    일성화이바 오토크레브 동작 데이터 \r\n';
+		      fs.appendFileSync(dataFileName,dataOut,'utf8');
+
+				var dataOut = '시작시간 =' + n + ':'+ time + '\r\n';
+		      fs.appendFileSync(dataFileName,dataOut,'utf8');
+
+				var dataOut = '=======================================\r\n';
+		      fs.appendFileSync(dataFileName,dataOut,'utf8');
+
+				var dataOut = '초\t온도\t압력\t진공1\t진공2\t진공3\t진공4\t진공5\t진공6 \r\n';
+		      fs.appendFileSync(dataFileName,dataOut,'utf8');
 			}
-			recordCount ++;
-			var dataOut =  recordCount +'\t';
+
+			var recordTime = new Date();
+			var recordNumber = Math.floor((recordTime.getTime() - startTime.getTime())/1000);
+
+			var dataOut =  recordNumber +'\t';
 			for( i = 0; i < 8 ; i++){
 				dataOut += traceData.channel[i] + '\t';
 			}	
+
+			dataOut +='\r\n';			
+	      fs.appendFileSync(dataFileName,dataOut,'utf8');
 			machineState = 1;	// machine running
 			recordSate = 1;
 	   } 
@@ -440,22 +441,11 @@ setInterval(function() {
    var time = date.toLocaleTimeString();
 	document.getElementById('clock1').innerHTML = n +':'+ time;
    //console.log(msg);
-   // traceCount = (traceCount > 599) ? 0 : traceCount+1;
-
-	if( traceCount > 599 ){
-		traceCount = 0;
-		if( machineState == 1){			// machine running
-
-//--- save image
-			saveGraphImage();
-			graphStartTime = new Date(); 
-		}
-	} else {
-		traceCount ++;
-	}	
-//--- end of print graph
+   
+	traceCount = (traceCount > 598) ? 0 : traceCount+1;
 
 	oscope.onPaint(trace);
+	recordCount +=2;
 
 },2000);
 
@@ -491,11 +481,30 @@ function btnEmg(){
 */
 }
 
+
 function btnStart(){
-	saveGraphImage();
+
+	console.log(getFileName());
 }
 
-function saveGraphImage(){
+function getFileName(){
+
+  	var endTime = new Date();
+  	var endDateString = endTime.toDateString();
+  	var endClock = endTime.toLocaleTimeString();
+
+	var endMonth = ( (endMonth = endTime.getMonth() + 1)<10)? '_0'+endMonth: '_'+endMonth;
+	var endDay =  ( (endDay = endTime.getDate()) < 10 ) ? '0'+ endDay : endDay;
+
+	var endHour = ( ( endHour = endTime.getHours()) < 10 ) ? '_0'+ endHour : '_'+ endHour;
+	var endMinute = (( endMinute = endTime.getMinutes()) < 10 ) ? '0'+ endMinute : endMinute;
+
+	var fileName = 'data/'+endTime.getFullYear()+ endMonth + endDay + endHour + endMinute;
+
+	return fileName;
+}
+
+function saveGraphImage(fName){
 
 	try{
 
@@ -508,29 +517,13 @@ function saveGraphImage(){
   	var endClock = endTime.toLocaleTimeString();
 	var end = "[ END = " + endDateString +':'+ endClock +" ]";
 
-	scope.onPaint(trace);
+	scope.onPaint(fName);
 	scope.writeTime(start,end);
-
 
   	var dataUrl = scopeImage.toDataURL();
 	var buffer = new Buffer(dataUrl.split(",")[1], 'base64');
 
-	var month = ( (month = graphStartTime.getMonth() + 1)<10)? '_0'+month: '_'+month;
-	var day =  ( (day = graphStartTime.getDate()) < 10 ) ? '0'+ day : day;
-
-	var Hour = ( ( Hour = graphStartTime.getHours()) < 10 ) ? '_0'+ Hour : '_'+ Hour;
-	var Minute = graphStartTime.getMinutes()+".png";
-
-	var endMonth = ( (endMonth = endTime.getMonth() + 1)<10)? '_0'+endMonth: '_'+endMonth;
-	var endDay =  ( (endDay = endTime.getDate()) < 10 ) ? '0'+ endDay : endDay;
-
-	var endHour = ( ( endHour = endTime.getHours()) < 10 ) ? '_0'+ endHour : '_'+ endHour;
-	var endMinute = (( endMinute = endTime.getMinutes()) < 10 ) ? '0'+ endMinute +".png" : endMinute+".png";
-
-	// var fileName = graphStartTime.getFullYear()+ month + day + Hour + Minute;
-	var fileName = 'graph/'+endTime.getFullYear()+ endMonth + endDay + endHour + endMinute;
-	// console.log( "fileName_test = " + fileName_test);
-	fs.writeFileSync(fileName,buffer,'base64',function(err){
+	fs.writeFileSync(fName+'.png',buffer,'base64',function(err){
 		if(err){
 			console.log('Err writeFileSync saveGraphImage() : '+err);
 			throw 'could not open file : ' +err;

@@ -335,148 +335,41 @@ var scope = (function() {
     return width / (seconds * samples_per_second);
   }
 
-  function drawTrace(ctx,trace,width,height,voffset) {
-		var	tempOffset = 0;
-    var t = [];
-    var ys;
-    var hs;
-    var i;
+  function drawTrace(fName,ctx,width,height) {
 
-    // compute scale factors
-//    ys = computeVerticalScale(m_vrange,m_yscale,m_height,m_volts_per_div * 10);
-    hs = computeHorizontalScale(mSecPerDiv*m_divisions,m_samples_per_second,m_width);
+  var i;
+    var hs = 600/36000;
+	var tempOffset = [ 25, 1.25, 112.5, 112.5, 112.5, 112.5, 112.5, 112.5]; 
+	var ys = [ 450/250, 450/12.5, 450/125, 450/125, 450/125, 450/125, 450/125, 450/125];
+	var fStyle=["green","#2ECCFA","magenta","black","red","#FF8000","gray","purple"];
 
-    // compute horizonal scale
+   var readText = fs.readFileSync(fName,'utf8');  
+   var test = readText.split('\r\n');
 
     ctx.save();
     ctx.translate(0,height);
     ctx.scale(1.0,-1.0);
 
-    // set channel parameters
-    switch(trace.channel) {
-    case 0:
-			tempOffset = 25;
-	    ys = 450 / 250;
-      // ctx.translate(xaxis[0][0],xaxis[0][1] + voffset);
-      ctx.strokeStyle = "green";
-      break;
+   test.forEach(function(element){
+      // console.log(element);
+      var dot = element.split('\t');
+		if( ! isNaN(dot[0]) ){
+			var i =1;
+			dot.forEach(function(value){				
+			   ctx.fillStyle = fStyle[i-1];
+				if( ! isNaN( dot[i])) ctx.fillRect( dot[0]*1.0 * hs, ( dot[i]*1.0 + tempOffset[i-1]) * ys[i-1],1,1);    
+				i++;
+			});
+		}			
+   });
+   
+	ctx.restore();     
+ 
+	}
 
-    case 1:
-			tempOffset = 1.25;
-			//tempOffset = 0.0;
-	    ys = 450 / 12.5; 
-      // ctx.translate(xaxis[1][0],xaxis[1][1] + voffset);
-      ctx.strokeStyle = "#2ECCFA";
-      break;
-
-    case 2:
-			tempOffset = 112.5;
-	    ys = 450 / 125 ; 
-      // ctx.translate(xaxis[1][0],xaxis[1][1] + voffset);
-      ctx.strokeStyle = "magenta";
-      break;
-
-    case 3:
-			tempOffset = 112.5;
-//	    ys = 450 / 0.125 * (-1); 
-	    ys = 450 / 125; 
-      // ctx.translate(xaxis[1][0],xaxis[1][1] + voffset);
-      ctx.strokeStyle = "white";
-      break;
-
-    case 4:
-			tempOffset = 112.5;
-	    ys = 450 / 125 ; 
-      // ctx.translate(xaxis[1][0],xaxis[1][1] + voffset);
-      ctx.strokeStyle = "red";
-      break;
-
-    case 5:
-			tempOffset = 112.5;
-	    ys = 450 / 125 ; 
-      // ctx.translate(xaxis[1][0],xaxis[1][1] + voffset);
-      ctx.strokeStyle = "#FF8000";
-      break;
-
-    case 6:
-			tempOffset = 112.5;
-	    ys = 450 / 125 ; 
-      // ctx.translate(xaxis[1][0],xaxis[1][1] + voffset);
-      ctx.strokeStyle = "gray";
-      break;
-
-    case 7:
-			tempOffset = 112.5;
-	    ys = 450 / 125 ; 
-      // ctx.translate(xaxis[1][0],xaxis[1][1] + voffset);
-      ctx.strokeStyle = "purple";
-      break;
-    }
-    
-    // scale the trace y axis
-    // samples are Int16Array
-    for(i=0;i<trace.length;++i) {
-      t.push([i*hs,((trace.sample[i])*1+tempOffset) * ys]);
-    }
-
-    // draw it
-    drawPath(ctx,t);
-    
-    ctx.restore();    
-    // restore context
-  }
-
-  function onPaint(trace) {
-    // draw oscope background
+  function onPaint(fName) {
     drawBackground(m_context,m_width,m_height,m_voffset);
-
-    // update trace if running and there is a new trace
-    if (m_run & (trace !== null)) {
-      // count updates
-      m_updates++;
-      // store the trace by channel
-//      m_trace[trace.channel] = trace;
-      m_trace[0] = trace[0];
-      m_trace[1] = trace[1];
-      m_trace[2] = trace[2];
-      m_trace[3] = trace[3];
-      m_trace[4] = trace[4];
-      m_trace[5] = trace[5];
-      m_trace[6] = trace[6];
-      m_trace[7] = trace[7];
-    }
-
-    // draw last traces
-    if (m_trace[0] !== null) {
-      drawTrace(m_context, m_trace[0], m_width, m_height, m_voffset[0]);
-    }
-    if (m_trace[1] !== null) {
-      drawTrace(m_context, m_trace[1], m_width, m_height, m_voffset[1]);
-    }
-    if (m_trace[2] !== null) {
-      drawTrace(m_context, m_trace[2], m_width, m_height, m_voffset[2]);
-    }
-    if (m_trace[3] !== null) {
-      drawTrace(m_context, m_trace[3], m_width, m_height, m_voffset[3]);
-    }
-
-    if (m_trace[4] !== null) {
-      drawTrace(m_context, m_trace[4], m_width, m_height, m_voffset[4]);
-    }
-
-    if (m_trace[5] !== null) {
-      drawTrace(m_context, m_trace[5], m_width, m_height, m_voffset[5]);
-    }
-
-    if (m_trace[6] !== null) {
-      drawTrace(m_context, m_trace[6], m_width, m_height, m_voffset[6]);
-    }
-
-    if (m_trace[7] !== null) {
-      drawTrace(m_context, m_trace[7], m_width, m_height, m_voffset[7]);
-    }
-
-    // draw text annotations
+	if(fName !== null) drawTrace(fName,m_context, m_width, m_height);
     drawAnnotations(m_context,m_width,m_height,m_text_size);
 	 writeLegend(); 
   }
@@ -588,23 +481,6 @@ var scope = (function() {
     m_run = run;
   }
 
-  function onResize(canvas) {
-
-    // var parent = $("#test-parent");
-    // var size = getCanvasSize($(window).height(),parent.width(),parent.height());
-    // m_text_size = getTextSize(size.width);
-    m_text_size = 12; // getTextSize(size.width);
-
-    m_canvas = canvas;
-    //m_width  = m_canvas.width  = size.width;
-    //m_height = m_canvas.height = size.height;
-    m_width  = m_canvas.width  = 600;
-    m_height = m_canvas.height = 450;
-    m_h2     = m_height / 2;
-    rescale(m_width,m_height);
-    onPaint(null);
-  }
-
 	function writeTime(start, end){
 
 	   m_context.fillStyle = "black";
@@ -654,19 +530,27 @@ var scope = (function() {
 	   m_context.fillText('진공6',x,40);				
 	}
 
+function onResize(canvas) {
+
+    m_text_size = 12; // getTextSize(size.width);
+
+    m_canvas = canvas;
+    m_width  = m_canvas.width  = 600;
+    m_height = m_canvas.height = 450;
+    m_h2     = m_height / 2;
+    rescale(m_width,m_height);
+    onPaint(null);
+  }
   function onInit(canvas) {
     m_canvas  = canvas;
     m_context = m_canvas.getContext("2d");
-    // attach resize event
-    // $(window).resize(onResize);
     onResize(canvas);
     onPaint(null);
  }
 
-
   return {
-    init               : onInit,
-    onResize           : onResize,
+	init						: onInit,
+	onResize				:onResize,
     onPaint            : onPaint,
     onSampleBits       : onSampleBits,
     onVoltsPerDiv      : onVoltsPerDiv,
