@@ -5,10 +5,10 @@
 	"license": "MIT",
 	"window": {
 		"title": "node-webkit demo",
-		"toolbar": true,
-		"frame": true,
+		"toolbar": false,
+		"frame": false,
 		"show": true,
-		"fullscreen": false,
+		"fullscreen": true,
 		"width": 1024,
 		"height": 768,
 		"position": "center",
