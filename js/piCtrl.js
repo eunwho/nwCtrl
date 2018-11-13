@@ -126,7 +126,7 @@ var gracefulShutdown = function() {
 }
 
 
-function changeNoVac(){
+function processExit(){
    console.log('\nShutting down, performing GPIO cleanup');
    process.exit(0);
 }

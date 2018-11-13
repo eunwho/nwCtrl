@@ -17,30 +17,28 @@
 </head>
 <body>
 
-<div class="container">
-	<div class='inner'>
-	<div class='centered'>
-		<div id='leftBox' class='csLeftBox'>
-			<div class='head title1'>
-				<span id='stater' class='csStateLampReady'>대기중</span>
-				<span class="title1 titleName">은후전력전자</span>
-			</div>
-			<div id="oscope-parent" class="csOscope">
-				<canvas id="oscope" class="oscope-canvas" width='450' height='280'></canvas>
-			</div>
-
-			<div id='bottomBox' class='csBottomBox'> 
-				<button id='btnEmg' 		class='w3-button w3-round w3-red' onclick='btnEmg()'>버튼1</button>
-				<button id='btnStart' 	class='w3-button w3-round w3-green' onclick='btnStart()'>버튼2</button>
-				<button id='btnStop' 	class='w3-button w3-round w3-blue' onclick='btnStop()'>정은후</button>
-				<button id='btnRestart' class='w3-button w3-round w3-indigo' onclick='btnRestart()'>그래프청소</button>
-				<button id='btnNoVac' 	class='w3-button w3-round w3-green' onclick='changeNoVac()'>동작정지</button>
-			</div>
-		</div> <!-- end of leftBox -->
+<div class="wrapper">
+	<div class="one">
+		<span id='clock1' class='titleName'>2018:02:07</span>
 	</div>
+	<div class="two">
+		<span id='clock2' class='titleName'>화요일</span>
+		<span id='clock3' class='titleName'>10:10:00</span>
+	</div>
+	<div class="three">
+		<canvas id="gauge1" class='cssGauge' data-type="radial-gauge" data-value-box="false" data-width="193" data-height="193"></canvas>
+	</div>
+	<div class="four">
+		<canvas id="gauge2" class='cssGauge' data-type="radial-gauge" data-value-box="false" data-width="193" data-height="193"></canvas>
+	</div>
+	<div class="five">
+		온도
+	</div>
+	<div class="six">
+		습도
+		<button class='w3-button w3-round w3-red'    onclick='processExit()'>동작정지 </button>
 	</div>
 </div>
-
 </body>
 </html>
 

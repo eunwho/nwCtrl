@@ -5,7 +5,7 @@
 	"license": "MIT",
 	"window": {
 		"title": "node-webkit demo",
-		"toolbar": false,
+		"toolbar": true,
 		"frame": false,
 		"show": true,
 		"fullscreen": true,
