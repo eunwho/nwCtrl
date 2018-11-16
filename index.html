@@ -18,26 +18,29 @@
 <body>
 
 <div class="wrapper">
-	<div class="one">
-		<span id='clock1' class='titleName'>2018:02:07</span>
-	</div>
-	<div class="two">
-		<span id='clock2' class='titleName'>화요일</span>
-		<span id='clock3' class='titleName'>10:10:00</span>
-	</div>
-	<div class="three">
-		<canvas id="gauge1" class='cssGauge' data-type="radial-gauge" data-value-box="false" data-width="193" data-height="193"></canvas>
-	</div>
-	<div class="four">
-		<canvas id="gauge2" class='cssGauge' data-type="radial-gauge" data-value-box="false" data-width="193" data-height="193"></canvas>
-	</div>
-	<div class="five">
-		온도
-	</div>
-	<div class="six">
-		습도
-		<button class='w3-button w3-round w3-red'    onclick='processExit()'>동작정지 </button>
-	</div>
+	<table align="center">
+		<tr> 
+			<td> <span id='clock1' class='titleName'>2018:02:07</span> 
+			<td>
+				<span id='clock2' class='titleName'>화요일</span>
+				<span id='clock3' class='titleName'>10:10:00</span>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<canvas id="gauge1" class='cssGauge' data-type="radial-gauge" data-value-box="false" data-width="193" data-height="193"></canvas>
+			</td>
+			<td>
+				<canvas id="gauge1" class='cssGauge' data-type="radial-gauge" data-value-box="false" data-width="193" data-height="193"></canvas>
+			</td>
+		</tr>
+		<tr>
+			<td> <h2>온도</h2> </td>
+			<td> 
+				<h2>습도</h2> 
+			</td>
+		</tr>
+	</table>
 </div>
 </body>
 </html>
