@@ -29,6 +29,8 @@ var procStartTime = new Date();
 var minute = 0;
 var ADDR_IN1 = 0x20, ADDR_IN2 = 0x21, ADDR_OUT1=0x22,ADDR_OUT2= 0x23;
 
+//nw.Window.get().showDevTools();
+require('nw.gui').Window.get().showDevTools();
 
 var Promise = require('promise');
 var fs = require('fs');
@@ -157,17 +159,21 @@ var dataFileName ='record0.dat';
 var tripLogFileName = 'ewtrip.log'
 var recordCount = 0;
 
+var date = new Date();
+var n = date.toLocaleDateString();
+var time = date.toLocaleTimeString();
+
 setInterval(function() {
 
-	var date = new Date();
-	var n = date.toLocaleDateString();
-	var time = date.toLocaleTimeString();
+	date = new Date();
+	n = date.toLocaleDateString();
+	time = date.toLocaleTimeString();
 
   for ( var i = 0; i <= 7; i++){
 		try{
-		//prepare Tx buffer [trigger byte = 0x01] [channel = 0x80(128)] [placeholder = 0x01]
-    var sendBuffer = new Buffer([0x01,(8 + i<<4),0x1]);
-    var recieveBuffer = new Buffer(3)
+	    var sendBuffer = new Buffer([0x01,(8 + i<<4),0x1]);
+   	 var recieveBuffer = new Buffer(3)
+			
 		rpio.spiTransfer(sendBuffer, recieveBuffer, sendBuffer.length); // send Tx buffer and recieve Rx buffer
 
     // Extract value from output buffer. Ignore first byte
@@ -177,32 +183,35 @@ setInterval(function() {
     // Ignore first six bits of MSB, bit shift MSB 8 position and 
     // finally combine LSB and MSB to get a full 10bit value
     var value = ((MSB & 3 ) << 8 ) + LSB;
+		var alpa = 0;
+		var beta = 0;
+		var offset = 0;
 
 		adcValue[i] = value;
 
 		if( i == 0 ){
-			var alpa = (coefDegr[1][1]-coefDegr[1][0])/( coefDegr[0][1] - coefDegr[0][0]);
-			var beta = coefDegr[1][1] - alpa * coefDegr[0][1];
-			var offset = 3.0;
+			alpa = (coefDegr[1][1]-coefDegr[1][0])/( coefDegr[0][1] - coefDegr[0][0]);
+			beta = coefDegr[1][1] - alpa * coefDegr[0][1];
+			offset = 3.0;
 			traceData.channel[0] = ((( alpa * value + beta) + offset ).toFixed(1))*1; 
 		}else if(i == 1 ){
-			var alpa = (coefPres[1][1]-coefPres[1][0])/( coefPres[0][1] - coefPres[0][0]);
-			var beta = coefPres[1][1] - alpa * coefPres[0][1];
-			var offset = 0.0;
+			alpa = (coefPres[1][1]-coefPres[1][0])/( coefPres[0][1] - coefPres[0][0]);
+			beta = coefPres[1][1] - alpa * coefPres[0][1];
+			offset = 0.0;
 			traceData.channel[1] = ((( alpa * value + beta) + offset ).toFixed(2))*1; 
 		} else{
-			var alpa = (coefVacu[1][1]-coefVacu[1][0])/( coefVacu[0][1] - coefVacu[0][0]);
-			var beta = coefVacu[1][1] - alpa * coefVacu[0][1];
-			var offset = 0.0;
+			alpa = (coefVacu[1][1]-coefVacu[1][0])/( coefVacu[0][1] - coefVacu[0][0]);
+			beta = coefVacu[1][1] - alpa * coefVacu[0][1];
+			offset = 0.0;
 			traceData.channel[i] = ((( alpa * value + beta) + offset ).toFixed(3))*1; 
 		}
-		} catch(e) {
-			var date = new Date();
-			var n = date.toLocaleDateString();
-			var time = date.toLocaleTimeString();
-			console.log('E time = ',n+' : ' + time);
-			console.log('SPI ADC error = ',e);
-		}
+	} catch(e) {
+		date = new Date();
+		n = date.toLocaleDateString();
+		time = date.toLocaleTimeString();
+		console.log('E time = ',n+' : ' + time);
+		console.log('SPI ADC error = ',e);
+	}
   };
 
 	// console.log('check1 = '+ traceData.channel);
@@ -439,15 +448,18 @@ setInterval(function() {
    var date = new Date();
    var n = date.toDateString();
    var time = date.toLocaleTimeString();
-	document.getElementById('clock1').innerHTML = n +':'+ time;
-   //console.log(msg);
+
+	var timeStamp = n + ' : ' + time;
+	document.getElementById('clock1').innerHTML = timeStamp;
+   
+	console.log(timeStamp);
    
 	traceCount = (traceCount > 598) ? 0 : traceCount+1;
 
 	oscope.onPaint(trace);
-	recordCount +=2;
+	recordCount +=5;
 
-},2000);
+},5000);
 
 var exec = require('child_process').exec;
 
@@ -483,8 +495,39 @@ function btnEmg(){
 
 
 function btnStart(){
+	testGraphImage("data/2018_1101_1459.dat");
+}
 
-	console.log(getFileName());
+function testGraphImage(fName){
+
+	try{
+
+  	//var startDateString = graphStartTime.toDateString();
+  	//var startClock = graphStartTime.toLocaleTimeString();
+	//var start = "[ START = " + startDateString +':'+ startClock +" ]";
+
+  	//var endTime = new Date();
+  	//var endDateString = endTime.toDateString();
+  	//var endClock = endTime.toLocaleTimeString();
+	//var end = "[ END = " + endDateString +':'+ endClock +" ]";
+
+	scope.onPaint(fName);
+	//scope.writeTime(start,end);
+
+  	var dataUrl = scopeImage.toDataURL();
+	var buffer = new Buffer(dataUrl.split(",")[1], 'base64');
+
+	fs.writeFileSync(fName+'.png',buffer,'base64',function(err){
+		if(err){
+			console.log('Err writeFileSync saveGraphImage() : '+err);
+			throw 'could not open file : ' +err;
+		}	
+	});
+	buffer = null;
+
+	} catch(e){
+		console.log(e);
+	}
 }
 
 function getFileName(){
@@ -654,6 +697,7 @@ function errMsgOut(input){
 }
 
 $("document").ready(function() {
+
    if (oscope) oscope.init();
 
 	scopeImage = document.createElement('canvas');
@@ -691,6 +735,12 @@ process.on('unhandledRejection', (reason, promise) => {
   // or whatever crash reporting service you use
 });
 */
+
+process.on('uncaughtException', function(err){
+	alert('Error found');
+	console.log(err);
+});
+
 
 process.on('unhandledRejection', function(reason, p){
   console.log('Unhandled Rejection at:', p, 'reason:', reason);
