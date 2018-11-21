@@ -5,26 +5,21 @@ const dataLength = 600;
 var scopeImage = document.createElement('canvas');
 var graphStartTime;
 var traceCount = 0;
-var traceData0 = { channel:0,length:dataLength,sample:[dataLength]}
-var traceData1 = { channel:1,length:dataLength,sample:[dataLength]}
-var traceData2 = { channel:2,length:dataLength,sample:[dataLength]}
-var traceData3 = { channel:3,length:dataLength,sample:[dataLength]}
-var traceData4 = { channel:4,length:dataLength,sample:[dataLength]}
-var traceData5 = { channel:5,length:dataLength,sample:[dataLength]}
-var traceData6 = { channel:6,length:dataLength,sample:[dataLength]}
-var traceData7 = { channel:7,length:dataLength,sample:[dataLength]}
-var trace =[traceData0,traceData1,traceData2,traceData3,
-				traceData4,traceData5,traceData6,traceData7];
- 
+
+var gData = { channel:0,length:dataLength,sample:[dataLength]}
+
+var trace =[];
+
+for( var i = 0 ; i < 8 ; i ++){ 
+	gData.channel = i;
+	trace.push(gData);
+}
+
 var adcValue = [0,0,0,0,0,0,0,0];
-var noVac = 1;
-var messages = 0;
-var tripNumber=0;
-var errState = 0;
-var motorErro =0;
-var heatErro = 0;
-var flowErro = 0;
+
+var messages = 0,tripNumber=0, errState = 0, motorErro =0,heatErro = 0,flowErro = 0;
 var adcValue = [0,0,0,0,0,0,0,0];
+
 var procStartTime = new Date();
 var minute = 0;
 var ADDR_IN1 = 0x20, ADDR_IN2 = 0x21, ADDR_OUT1=0x22,ADDR_OUT2= 0x23;
@@ -97,8 +92,7 @@ var writeMcp23017 = function(address,port,byte){
     piI2c.writeByte(address,GPIO,byte,function(err){
       if(err){
         reject(err);
-      }
-      else{
+      } else {
         resolve();
       }
     });
@@ -122,8 +116,7 @@ var readMcp23017 = function(address,port){
     piI2c.readByte(address,GPIO,function(err,Byte){
       if(err){
         reject(err);
-      }
-      else{
+      } else {
         resolve(Byte);
       }
     });
@@ -139,17 +132,8 @@ function getElapedTime(count){
 	return (':'+hour +'시간:' +min +'분:'+sec+'초 동작함');
 }
 
-var msgBoxCount=0;
-
-var motorError=0;
-var heatErro = 0;
-var flowSensErro =0;
-
-var machineState = 0;
-var recordState = 0;
-var startTime = 0;
-var poweroff = 0;
-var startState = 0;
+var msgBoxCount=0,motorError=0, heatErro = 0, flowSensErro =0;
+var machineState = 0, recordState = 0, startTime = 0, poweroff = 0, startState = 0;
 
 var coefDegr = [[690,900],[0,200]]; // 1V --> 0도 --> 690, 5V --> 200degree --> 900,
 var coefPres = [[690,900],[0,10]]; // 1V --> 0.0Mpa --> 690, 5V --> 2.0 Mpa --> 900,
@@ -246,21 +230,14 @@ setInterval(function() {
 			}
 		} else {
 			if( recordState == 0 ){
-				recordCount = 0;
-				recordState = 1;
+				recordCount = 0; recordState = 1;
 
 				graphStartTime = new Date();
 
-				for( var i = 0 ; i < 600 ; i ++){
-					traceData0.sample[i] = 0;
-					traceData1.sample[i] = 0;
-					traceData2.sample[i] = 0;
-					traceData3.sample[i] = 0;
-					traceData4.sample[i] = 0;
-					traceData5.sample[i] = 0;
-					traceData6.sample[i] = 0;
-					traceData7.sample[i] = 0;
+				for( var j = 0 ; j < 8 ; j ++) {
+					for( var i = 0 ; i < 600 ; i ++) { trace[j].sample[i] = 0 ;} 
 				}
+
 				traceCount = 0;
 
 			   startTime = new Date();
@@ -290,7 +267,7 @@ setInterval(function() {
 			var recordNumber = Math.floor((recordTime.getTime() - startTime.getTime())/1000);
 
 			var dataOut =  recordNumber +'\t';
-			for( i = 0; i < 8 ; i++){
+			for( var i = 0; i < 8 ; i++){
 				dataOut += traceData.channel[i] + '\t';
 			}	
 
@@ -417,15 +394,13 @@ setInterval(function() {
 		console.log('process.stdout.write error = ',e);
 	}
 
-	traceData0.sample[traceCount] = traceData.channel[0];
-	traceData1.sample[traceCount] = traceData.channel[1];
-	traceData2.sample[traceCount] = traceData.channel[2];
-	traceData3.sample[traceCount] = traceData.channel[3];
-	traceData4.sample[traceCount] = traceData.channel[4];
-	traceData5.sample[traceCount] = traceData.channel[5];
-	traceData6.sample[traceCount] = traceData.channel[6];
-	traceData7.sample[traceCount] = traceData.channel[7];
+	try{
 
+	for( var i = 0 ; i < 8 ; i ++ ){
+		trace[i].sample[traceCount] = traceData.channel[i];
+	}
+
+	
    $('canvas[id="rGauge1"]').attr('data-value', (traceData.channel[0]));
    $('canvas[id="rGauge2"]').attr('data-value', (traceData.channel[1]));
    $('canvas[id="rGauge3"]').attr('data-value', (traceData.channel[2]));
@@ -434,6 +409,7 @@ setInterval(function() {
    $('canvas[id="rGauge6"]').attr('data-value', (traceData.channel[5]));
    $('canvas[id="rGauge7"]').attr('data-value', (traceData.channel[6]));
    $('canvas[id="rGauge8"]').attr('data-value', (traceData.channel[7]));
+
 
    if( machineState === 0 ){
 		document.getElementById('stater').innerHTML ='대기중';    
@@ -456,10 +432,18 @@ setInterval(function() {
    
 	traceCount = (traceCount > 598) ? 0 : traceCount+1;
 
-	oscope.onPaint(trace);
-	recordCount +=5;
+	// oscope.onPaint(trace);
+	oscope.drawDot(traceCount,traceData.channel);
+	recordCount +=1;
 
-},5000);
+	} catch(e) {
+		var date = new Date();
+		var n = date.toLocaleDateString();
+		var time = date.toLocaleTimeString();
+		console.log('E time = ',n+' : ' + time);
+		console.log('process.stdout.write error = ',e);
+	}
+},1000);
 
 var exec = require('child_process').exec;
 
@@ -501,15 +485,6 @@ function btnStart(){
 function testGraphImage(fName){
 
 	try{
-
-  	//var startDateString = graphStartTime.toDateString();
-  	//var startClock = graphStartTime.toLocaleTimeString();
-	//var start = "[ START = " + startDateString +':'+ startClock +" ]";
-
-  	//var endTime = new Date();
-  	//var endDateString = endTime.toDateString();
-  	//var endClock = endTime.toLocaleTimeString();
-	//var end = "[ END = " + endDateString +':'+ endClock +" ]";
 
 	scope.onPaint(fName);
 	//scope.writeTime(start,end);
@@ -581,17 +556,17 @@ function saveGraphImage(fName){
 
 function btnRestart(){
 	traceCount = 0;
-	for( var i = 0 ; i < 600 ; i ++){
-
-		traceData0.sample[i] = ' ';
-		traceData1.sample[i] = ' ';
-		traceData2.sample[i] = ' ';
-		traceData3.sample[i] = ' ';
-		traceData4.sample[i] = ' ';
-		traceData5.sample[i] = ' ';
-		traceData6.sample[i] = ' ';
-		traceData7.sample[i] = ' ';
+	for( var j = 0 ; j < 8 ; j++){
+		for( var i = 0 ; i < 600 ; i ++){ trace[j].sample[i] = 0;}  	
 	}
+	//var startDateString = graphStartTime.toDateString();
+  	//var startClock = graphStartTime.toLocaleTimeString();
+	//var start = "[ START = " + startDateString +':'+ startClock +" ]";
+
+  	//var endTime = new Date();
+  	//var endDateString = endTime.toDateString();
+  	//var endClock = endTime.toLocaleTimeString();
+	//var end = "[ END = " + endDateString +':'+ endClock +" ]";
 }
 
 function initTempGauge(gId){

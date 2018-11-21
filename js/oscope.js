@@ -642,9 +642,19 @@ var oscope = (function() {
     onPaint(null);
   }
 
-	//--- invert code table create
-  function createCodeTable(arg1) {
-  }
+	function drawDot(gCount, chData){
+
+		var ctx = m_context;
+		var i;
+		var tempOffset = [ 25, 1.25, 112.5, 112.5, 112.5, 112.5, 112.5, 112.5]; 
+   	var ys = [ 450/250, 450/12.5, 450/125, 450/125, 450/125, 450/125, 450/125, 450/125];
+   	var fStyle=["green","#2ECCFA","magenta","darkgray","red","#FF8000","gray","purple"];
+
+		for(i = 0; i < 8 ; i ++){
+	      ctx.fillStyle = fStyle[i-1];
+   	   ctx.fillRect( gCount, ( chData[i] * 1.0 + tempOffset[i-1]) * ys[i-1],2,2);    
+		}
+	}
 
   return {
     init               : onInit,
@@ -659,7 +669,7 @@ var oscope = (function() {
     onCursorMove       : onCursorMove,
     onCursorSelect     : onCursorSelect,
     onRunStop          : onRunStop,
-		createCodeTable		 : createCodeTable
+	 drawDot				  : drawDot
   };
 
 })();
