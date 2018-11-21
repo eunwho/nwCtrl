@@ -1,19 +1,8 @@
 //"use strict";
 
-const dataLength = 600;
-
 var scopeImage = document.createElement('canvas');
 var graphStartTime;
 var traceCount = 0;
-
-var gData = { channel:0,length:dataLength,sample:[dataLength]}
-
-var trace =[];
-
-for( var i = 0 ; i < 8 ; i ++){ 
-	gData.channel = i;
-	trace.push(gData);
-}
 
 var adcValue = [0,0,0,0,0,0,0,0];
 
@@ -396,11 +385,6 @@ setInterval(function() {
 
 	try{
 
-	for( var i = 0 ; i < 8 ; i ++ ){
-		trace[i].sample[traceCount] = traceData.channel[i];
-	}
-
-	
    $('canvas[id="rGauge1"]').attr('data-value', (traceData.channel[0]));
    $('canvas[id="rGauge2"]').attr('data-value', (traceData.channel[1]));
    $('canvas[id="rGauge3"]').attr('data-value', (traceData.channel[2]));
@@ -465,7 +449,6 @@ var gracefulShutdown = function() {
   }, 10*1000);
 }
 
-
 function changeNoVac(){
    console.log('\nShutting down, performing GPIO cleanup');
    rpio.spiEnd();
@@ -476,7 +459,6 @@ function btnEmg(){
 /*
 */
 }
-
 
 function btnStart(){
 	testGraphImage("data/2018_1101_1459.dat");
@@ -556,9 +538,6 @@ function saveGraphImage(fName){
 
 function btnRestart(){
 	traceCount = 0;
-	for( var j = 0 ; j < 8 ; j++){
-		for( var i = 0 ; i < 600 ; i ++){ trace[j].sample[i] = 0;}  	
-	}
 	//var startDateString = graphStartTime.toDateString();
   	//var startClock = graphStartTime.toLocaleTimeString();
 	//var start = "[ START = " + startDateString +':'+ startClock +" ]";

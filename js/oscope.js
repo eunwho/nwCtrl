@@ -461,56 +461,7 @@ var oscope = (function() {
   }
 
   function onPaint(trace) {
-    // draw oscope background
     drawBackground(m_context,m_width,m_height,m_voffset);
-
-    // update trace if running and there is a new trace
-    if (m_run & (trace !== null)) {
-      // count updates
-      m_updates++;
-      // store the trace by channel
-//      m_trace[trace.channel] = trace;
-      m_trace[0] = trace[0];
-      m_trace[1] = trace[1];
-      m_trace[2] = trace[2];
-      m_trace[3] = trace[3];
-      m_trace[4] = trace[4];
-      m_trace[5] = trace[5];
-      m_trace[6] = trace[6];
-      m_trace[7] = trace[7];
-    }
-
-    // draw last traces
-    if (m_trace[0] !== null) {
-      drawTrace(m_context, m_trace[0], m_width, m_height, m_voffset[0]);
-    }
-    if (m_trace[1] !== null) {
-      drawTrace(m_context, m_trace[1], m_width, m_height, m_voffset[1]);
-    }
-    if (m_trace[2] !== null) {
-      drawTrace(m_context, m_trace[2], m_width, m_height, m_voffset[2]);
-    }
-    if (m_trace[3] !== null) {
-      drawTrace(m_context, m_trace[3], m_width, m_height, m_voffset[3]);
-    }
-
-    if (m_trace[4] !== null) {
-      drawTrace(m_context, m_trace[4], m_width, m_height, m_voffset[4]);
-    }
-
-    if (m_trace[5] !== null) {
-      drawTrace(m_context, m_trace[5], m_width, m_height, m_voffset[5]);
-    }
-
-    if (m_trace[6] !== null) {
-      drawTrace(m_context, m_trace[6], m_width, m_height, m_voffset[6]);
-    }
-
-    if (m_trace[7] !== null) {
-      drawTrace(m_context, m_trace[7], m_width, m_height, m_voffset[7]);
-    }
-
-    // draw text annotations
     drawAnnotations(m_context,m_width,m_height,m_text_size);
   }
 
