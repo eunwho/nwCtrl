@@ -1,3 +1,5 @@
+const GRAPH_MAX_COUNT= 0.1 * 60 * 60; // 1 hour count
+
 var oscope = (function() {
   var m_canvas;
   var m_context;
@@ -339,14 +341,13 @@ var oscope = (function() {
   }
 
 	function drawDot(gCount, chData){
-		var hs = 1000 / 18000;
+
+		var hs = 900 / GRAPH_MAX_COUNT;
 		var ctx = m_context;
 		var i;
 
 		var tempOffset = [ 25, 1.25, 112.5, 112.5, 112.5, 112.5, 112.5, 112.5]; 
    	var ys = [ 200/250, 200/12.5, 200/125, 200/125, 200/125, 200/125, 200/125, 200/125];
-//		var tempOffset = [ 25, 1.25, 112.5, 112.5, 112.5, 112.5, 112.5, 112.5]; 
-//   	var ys = [ 450/250, 450/12.5, 450/125, 450/125, 450/125, 450/125, 450/125, 450/125];
    	var fStyle=["green","#2ECCFA","magenta","darkgray","red","#FF8000","gray","purple"];
 
 		for(i = 0; i < 8 ; i ++){

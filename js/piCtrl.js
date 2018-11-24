@@ -1,4 +1,5 @@
-//"use strict";
+//"use strict"
+const GRAPH_MAX_COUNT = 0.1 * 60 * 60;
 
 var scopeImage = document.createElement('canvas');
 var graphStartTime;
@@ -112,7 +113,10 @@ var readMcp23017 = function(address,port){
   });
 }
 
-function getElapedTime(count){
+function getElapedTime( ){
+	
+	var tempDate = new Date();
+	var count = tempDate - startTime;
 	var second = count /1000;
 	var hour = Math.floor( second / 3600 );
 	var min  = Math.floor(( second - hour * 3600)/60);
@@ -129,37 +133,68 @@ var coefPres = [[690,900],[0,10]]; // 1V --> 0.0Mpa --> 690, 5V --> 2.0 Mpa --> 
 var coefVacu = [[690,900],[0,-100]]; // 1V --> 0.0Mpa --> 690, 5V --> -0.1Mpa --> 900,
 
 var dataFileName ='record0.dat';
-var tripLogFileName = 'ewtrip.log'
+var tripLogFileName = 'ewtrip.log';
 var recordCount = 0;
 
 var date = new Date();
 var n = date.toLocaleDateString();
 var time = date.toLocaleTimeString();
 
-setInterval(function() {
+function getClockStr(){
+   var date = new Date();
+   var n = date.toDateString();
+   var time = date.toLocaleTimeString();
+	var timeStamp = n + ' : ' + time;
+	return timeStamp;
+}
+	
+function setGraphStart(){
+	recordCount = 0; 
+	recordState = 1;
+	traceCount = 0;
 
-	date = new Date();
-	n = date.toLocaleDateString();
-	time = date.toLocaleTimeString();
+	graphStartTime = new Date();
+   startTime = new Date();
+	
+	oscope.init();
 
-  for ( var i = 0; i <= 7; i++){
-		try{
-	    var sendBuffer = new Buffer([0x01,(8 + i<<4),0x1]);
-   	 var recieveBuffer = new Buffer(3)
+	document.getElementById('startTimeStamp').innerHTML = getClockStr( );
+	dataFileName = getFileName()+".dat";				
+
+	var dataOut = '=======================================\r\n';
+   fs.writeFileSync(dataFileName,dataOut,'utf8');
+
+	var dataOut = '    일성화이바 오토크레브 동작 데이터 \r\n';
+   fs.appendFileSync(dataFileName,dataOut,'utf8');
+
+	var dataOut = '시작시간 =' + n + ':'+ time + '\r\n';
+	fs.appendFileSync(dataFileName,dataOut,'utf8');
+
+	var dataOut = '=======================================\r\n';
+	fs.appendFileSync(dataFileName,dataOut,'utf8');
+
+	var dataOut = '초\t온도\t압력\t진공1\t진공2\t진공3\t진공4\t진공5\t진공6 \r\n';
+	fs.appendFileSync(dataFileName,dataOut,'utf8');
+}
+
+function getAdcValue(){
+	var alpa = 0, beta = 0, offset = 0;
+	var junk = 0, MSB = 0, LSB = 0;
+	var sendBuffer = new Buffer([0x01,(8 + i<<4),0x1]);
+   var recieveBuffer = new Buffer(3)
+	var value = 0;
+
+	try{
+	for ( var i = 0; i < 8 ; i++){
+		sendBuffer = new Buffer([0x01,(8 + i<<4),0x1]);
+   	recieveBuffer = new Buffer(3)
 			
-		rpio.spiTransfer(sendBuffer, recieveBuffer, sendBuffer.length); // send Tx buffer and recieve Rx buffer
+		rpio.spiTransfer(sendBuffer, recieveBuffer, sendBuffer.length);
 
-    // Extract value from output buffer. Ignore first byte
-    var junk = recieveBuffer[0];
-    var MSB = recieveBuffer[1];
-    var LSB = recieveBuffer[2];
-    // Ignore first six bits of MSB, bit shift MSB 8 position and 
-    // finally combine LSB and MSB to get a full 10bit value
-    var value = ((MSB & 3 ) << 8 ) + LSB;
-		var alpa = 0;
-		var beta = 0;
-		var offset = 0;
-
+		junk = recieveBuffer[0];
+	   MSB = recieveBuffer[1];
+   	LSB = recieveBuffer[2];
+    	value = ((MSB & 3 ) << 8 ) + LSB;
 		adcValue[i] = value;
 
 		if( i == 0 ){
@@ -178,17 +213,19 @@ setInterval(function() {
 			offset = 0.0;
 			traceData.channel[i] = ((( alpa * value + beta) + offset ).toFixed(3))*1; 
 		}
+	}
 	} catch(e) {
-		date = new Date();
-		n = date.toLocaleDateString();
-		time = date.toLocaleTimeString();
-		console.log('E time = ',n+' : ' + time);
+		console.log('AT = ' + getClockStr());
 		console.log('SPI ADC error = ',e);
 	}
-  };
+}
+
+setInterval(function() {
+
+	getAdcValue();	// upDate traceData.channel 
 
 	// console.log('check1 = '+ traceData.channel);
-  var promise = readMcp23017(ADDR_IN1,0); //외부 입력을 읽음
+	var promise = readMcp23017(ADDR_IN1,0); //외부 입력을 읽음
 
   promise
   .then(function(byte){
@@ -200,56 +237,20 @@ setInterval(function() {
 			if ( machineState ) {  // 시작상태에 있다가 정지상태로 변환 되는 시점의 처리
 				recordState ++;
 				if(recordState > 2 ) {
-					var endTime = new Date();
-					var elapedTime = endTime-startTime;
-
-   				var n = endTime.toDateString();
-   				var time = endTime.toLocaleTimeString();
-
-  					document.getElementById('endTimeStamp').innerHTML = n +':'+ time;
-					document.getElementById('elapedTimeStamp').innerHTML = getElapedTime(elapedTime);    
-					// myEmitter.emit('event', startTime );
 					machineState = 0; // machine ready
 					recordState = 0;
+
+  					document.getElementById('endTimeStamp').innerHTML = getClockStr( );
+					document.getElementById('elapedTimeStamp').innerHTML = getElapedTime( );    
 					saveGraphImage(dataFileName);  
 				} 
 			}else{
 				machineState = 0;
 				recordState = 0;
 			}
-		} else {
+		} else {	// start input ON 
 			if( recordState == 0 ){
-				recordCount = 0; recordState = 1;
-
-				graphStartTime = new Date();
-
-				for( var j = 0 ; j < 8 ; j ++) {
-					for( var i = 0 ; i < 600 ; i ++) { trace[j].sample[i] = 0 ;} 
-				}
-
-				traceCount = 0;
-
-			   startTime = new Date();
-   			var n = startTime.toDateString();
-   			var time = startTime.toLocaleTimeString();
-
-  				document.getElementById('startTimeStamp').innerHTML = n +':'+ time;
-				dataFileName = getFileName()+".dat";				
-
-				var dataOut = '=======================================\r\n';
-		      fs.writeFileSync(dataFileName,dataOut,'utf8');
-
-				var dataOut = '    일성화이바 오토크레브 동작 데이터 \r\n';
-		      fs.appendFileSync(dataFileName,dataOut,'utf8');
-
-				var dataOut = '시작시간 =' + n + ':'+ time + '\r\n';
-		      fs.appendFileSync(dataFileName,dataOut,'utf8');
-
-				var dataOut = '=======================================\r\n';
-		      fs.appendFileSync(dataFileName,dataOut,'utf8');
-
-				var dataOut = '초\t온도\t압력\t진공1\t진공2\t진공3\t진공4\t진공5\t진공6 \r\n';
-		      fs.appendFileSync(dataFileName,dataOut,'utf8');
+				setGraphStart();
 			}
 
 			var recordTime = new Date();
@@ -265,6 +266,7 @@ setInterval(function() {
 			machineState = 1;	// machine running
 			recordSate = 1;
 	   } 
+//--- end of start input process
 
       temp =  (inMcp23017[0] & 2 );
 		if( temp ){
@@ -274,6 +276,7 @@ setInterval(function() {
 			if(poweroff > 1 ) shutdown ();
 		}
 
+//--- check motor error
       temp =  (inMcp23017[0] & 4 );
 		if( temp ){
 			motorError = 0;
@@ -292,6 +295,7 @@ setInterval(function() {
 			} 
 		}
 
+//--- check heat Error
       temp =  (inMcp23017[0] & 8 );
 		if( temp ){
 			heatErro = 0;
@@ -310,6 +314,7 @@ setInterval(function() {
 			}
 		}
 
+//--- check flowSensError
       temp =  (inMcp23017[0] & 16 );
 		if( temp ){
 				flowSensErro = 0;
@@ -329,59 +334,9 @@ setInterval(function() {
 		}
 		 return writeMcp23017(ADDR_OUT1,0,byte);
  		}
-   
   }).catch(function(err){
     console.log(err);
-  }).then(function(){
-    return(readMcp23017(ADDR_IN1,1));
-  }).catch(function(err){
-    console.log(err);
-  }).then(function(byte){
-    if(byte < 256 ){
-      inMcp23017[1] = byte;
-      return writeMcp23017(ADDR_OUT1,1,byte);
-    } 
-  }).catch(function(err){
-    console.log(err);
-  }).then(function(){
-    return(readMcp23017(ADDR_IN2,0));
-  }).catch(function(err){
-    console.log(err);
-  }).then(function(byte){
-    if(byte < 256 ){
-      inMcp23017[2] = byte;
-      return writeMcp23017(ADDR_OUT2,0,byte);
-    } 
-  }).catch(function(err){
-    console.log(err);
-  }).then(function(){
-    return(readMcp23017(ADDR_IN2,1));
-  }).then(function(byte){
-    if(byte < 256 ){
-	  	inMcp23017[3] = byte;
-      return writeMcp23017(ADDR_OUT2,1,byte);
-    } 
-  }).catch(function(err){
-    console.log(err);
-  }); 
-
-	try{
-		count = (channel > 60*60*4 ) ? 0 : count+1; 
-	  var portVal = 0;
-		if( (count % 10) == 0 ){
-			var endTime = new Date();
-			var timeDiff = endTime - procStartTime;
-			timeDiff /= 1000;
-			timeDiff /= 60;
-			minute = Math.round(timeDiff);
-		}
-	} catch(e) {
-		var date = new Date();
-		var n = date.toLocaleDateString();
-		var time = date.toLocaleTimeString();
-		console.log('E time = ',n+' : ' + time);
-		console.log('process.stdout.write error = ',e);
-	}
+  });
 
 	try{
 
@@ -396,29 +351,33 @@ setInterval(function() {
 
 	document.getElementById('stater').innerHTML = (machineState) ? '동작중' : '대기중';    
 
-   var date = new Date();
-   var n = date.toDateString();
-   var time = date.toLocaleTimeString();
+	var nowClock = getClockStr();
+	document.getElementById('clock1').innerHTML = nowClock;
+	console.log(nowClock);
 
-	var timeStamp = n + ' : ' + time;
-	document.getElementById('clock1').innerHTML = timeStamp;
-   
-	console.log(timeStamp);
-   
-	traceCount = (traceCount > 598) ? 0 : traceCount+1;
+	if(machineState){ 
 
-	// oscope.onPaint(trace);
-	oscope.drawDot(traceCount,traceData.channel);
-	recordCount ++;
+		var tempTime = new Date();
+		var elapedTime = tempTime-graphStartTime;
+		var xTimeCount1 = elapedTime/1000;
+		var xTimeCount2 = 0;
+		
+		if ( xTimeCount1 < GRAPH_MAX_COUNT ){
+			xTimeCount2 = xTimeCount1;
+		} else {
+			graphStartTime = new Date();
+			oscope.init();
+		}
 
+		document.getElementById('elapedTimeStamp').innerHTML = getElapedTime();    
+		oscope.drawDot(xTimeCount2, traceData.channel);
+	}
 	} catch(e) {
-		var date = new Date();
-		var n = date.toLocaleDateString();
-		var time = date.toLocaleTimeString();
-		console.log('E time = ',n+' : ' + time);
+		console.log('E time = ',getClockStr());
 		console.log('process.stdout.write error = ',e);
 	}
 },2000);
+
 
 var exec = require('child_process').exec;
 
@@ -447,27 +406,34 @@ function btnExit(){
 }
 
 function btnStart(){
-	testGraphImage("data/2018_1101_1459.dat");
+	testGraphImage( );
 }
 
-function testGraphImage(fName){
+function btnStop(){
+	testGraphImage( );
+}
+
+
+function testGraphImage( ){
 
 	try{
 
-	scope.onPaint(fName);
-	//scope.writeTime(start,end);
+ 		// scopeImage = m_canvas  = $("#oscope")[0];
+    	// m_context = m_canvas.getContext("2d");
+ 		// scope.onPaint(fName);
+		//scope.writeTime(start,end);
 
-  	var dataUrl = scopeImage.toDataURL();
-	var buffer = new Buffer(dataUrl.split(",")[1], 'base64');
+		var scopeImage = $("#oscope")[0]; 
+  		var dataUrl = scopeImage.toDataURL();
+		var buffer = new Buffer(dataUrl.split(",")[1], 'base64');
 
-	fs.writeFileSync(fName+'.png',buffer,'base64',function(err){
-		if(err){
-			console.log('Err writeFileSync saveGraphImage() : '+err);
-			throw 'could not open file : ' +err;
-		}	
-	});
-	buffer = null;
-
+		fs.writeFileSync('test.png',buffer,'base64',function(err){
+			if(err){
+				console.log('Err writeFileSync saveGraphImage() : '+err);
+				throw 'could not open file : ' +err;
+			}	
+		});
+		buffer = null;
 	} catch(e){
 		console.log(e);
 	}
@@ -672,8 +638,8 @@ process.on('unhandledRejection', (reason, promise) => {
 */
 
 process.on('uncaughtException', function(err){
-	alert('Error found');
 	console.log(err);
+	alert('Error found');
 });
 
 
