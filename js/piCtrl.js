@@ -19,7 +19,7 @@ require('nw.gui').Window.get().showDevTools();
 var Promise = require('promise');
 var fs = require('fs');
 
-var reloadWatcher=fs.watch('./js/',function(){
+var reloadWatcher=fs.watch('./',function(){
 	location.reload();
 	reloadWatcher.close();
 });
@@ -366,7 +366,7 @@ setInterval(function() {
   }); 
 
 	try{
-		count = (channel > 598 ) ? 0 : count+1; 
+		count = (channel > 60*60*4 ) ? 0 : count+1; 
 	  var portVal = 0;
 		if( (count % 10) == 0 ){
 			var endTime = new Date();
@@ -394,16 +394,7 @@ setInterval(function() {
    $('canvas[id="rGauge7"]').attr('data-value', (traceData.channel[6]));
    $('canvas[id="rGauge8"]').attr('data-value', (traceData.channel[7]));
 
-
-   if( machineState === 0 ){
-		document.getElementById('stater').innerHTML ='대기중';    
-      $('stater').removeClass('csStateLampRunning');
-      $('stater').addClass('csStateLampReady');
-   }else{
-    	document.getElementById('stater').innerHTML ='동작중';
-      $('stater').removeClass('csStateLampReady');
-      $('stater').addClass('csStateLampRunning');
-   }  
+	document.getElementById('stater').innerHTML = (machineState) ? '동작중' : '대기중';    
 
    var date = new Date();
    var n = date.toDateString();
@@ -418,7 +409,7 @@ setInterval(function() {
 
 	// oscope.onPaint(trace);
 	oscope.drawDot(traceCount,traceData.channel);
-	recordCount +=1;
+	recordCount ++;
 
 	} catch(e) {
 		var date = new Date();
@@ -427,7 +418,7 @@ setInterval(function() {
 		console.log('E time = ',n+' : ' + time);
 		console.log('process.stdout.write error = ',e);
 	}
-},1000);
+},2000);
 
 var exec = require('child_process').exec;
 
@@ -449,15 +440,10 @@ var gracefulShutdown = function() {
   }, 10*1000);
 }
 
-function changeNoVac(){
+function btnExit(){
    console.log('\nShutting down, performing GPIO cleanup');
    rpio.spiEnd();
    process.exit(0);
-}
-
-function btnEmg(){
-/*
-*/
 }
 
 function btnStart(){
@@ -592,9 +578,6 @@ function initVacuGauge(gId){
 
 function initGauge(gId){
    var a = 'canvas[id=' + gId + ']';
-// $(a).attr('data-width',200);
-// $(a).attr('data-height',200);
-// $(a).attr('data-type',"radial-gauge");
    $(a).attr('data-ticks-angle',275);
    $(a).attr('data-start-angle',45);
    $(a).attr('data-value-text-shadow',"true");
@@ -628,8 +611,6 @@ function initGauge(gId){
    $(a).attr('data-color-value-box-rect-end',"#333");
    $(a).attr('data-value-box',false);
    $(a).attr('data-value-box-strocke',100);
-   $(a).attr('data-value-box',false);
-   $(a).attr('data-value-box-strocke',100);
    $(a).attr('data-value-box-width',100);
    $(a).attr('data-value-box-text',100);
    $(a).attr('data-value-box-text-shadow',false);
@@ -656,8 +637,8 @@ $("document").ready(function() {
 
 	scopeImage = document.createElement('canvas');
 	scopeImage.id = "test";
-	scopeImage.width = 600;
-	scopeImage.hight = 450;
+	scopeImage.width = 1000;
+	scopeImage.hight = 200;
 
 	scope.init(scopeImage);
 
