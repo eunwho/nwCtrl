@@ -1,5 +1,5 @@
 //"use strict"
-const GRAPH_MAX_COUNT = 0.1 * 60 * 60;
+const GRAPH_MAX_COUNT = 1 * 60 * 60;
 
 var scopeImage = document.createElement('canvas');
 var graphStartTime;
@@ -14,8 +14,8 @@ var procStartTime = new Date();
 var minute = 0;
 var ADDR_IN1 = 0x20, ADDR_IN2 = 0x21, ADDR_OUT1=0x22,ADDR_OUT2= 0x23;
 
-//nw.Window.get().showDevTools();
-require('nw.gui').Window.get().showDevTools();
+// nw.Window.get().showDevTools();
+// require('nw.gui').Window.get().showDevTools();
 
 var Promise = require('promise');
 var fs = require('fs');
@@ -154,27 +154,27 @@ function setGraphStart(){
 	traceCount = 0;
 
 	graphStartTime = new Date();
-   startTime = new Date();
 	
 	oscope.init();
 
 	document.getElementById('startTimeStamp').innerHTML = getClockStr( );
-	dataFileName = getFileName()+".dat";				
+	dataFileName = getFileName();
+	var dFileName = dataFileName + '.dat';				
 
 	var dataOut = '=======================================\r\n';
-   fs.writeFileSync(dataFileName,dataOut,'utf8');
+   fs.writeFileSync(dFileName,dataOut,'utf8');
 
 	var dataOut = '    일성화이바 오토크레브 동작 데이터 \r\n';
-   fs.appendFileSync(dataFileName,dataOut,'utf8');
+   fs.appendFileSync(dFileName,dataOut,'utf8');
 
 	var dataOut = '시작시간 =' + n + ':'+ time + '\r\n';
-	fs.appendFileSync(dataFileName,dataOut,'utf8');
+	fs.appendFileSync(dFileName,dataOut,'utf8');
 
 	var dataOut = '=======================================\r\n';
-	fs.appendFileSync(dataFileName,dataOut,'utf8');
+	fs.appendFileSync(dFileName,dataOut,'utf8');
 
 	var dataOut = '초\t온도\t압력\t진공1\t진공2\t진공3\t진공4\t진공5\t진공6 \r\n';
-	fs.appendFileSync(dataFileName,dataOut,'utf8');
+	fs.appendFileSync(dFileName,dataOut,'utf8');
 }
 
 function getAdcValue(){
@@ -250,6 +250,7 @@ setInterval(function() {
 			}
 		} else {	// start input ON 
 			if( recordState == 0 ){
+			   startTime = new Date();
 				setGraphStart();
 			}
 
@@ -262,7 +263,7 @@ setInterval(function() {
 			}	
 
 			dataOut +='\r\n';			
-	      fs.appendFileSync(dataFileName,dataOut,'utf8');
+	      fs.appendFileSync(dataFileName+'.dat',dataOut,'utf8');
 			machineState = 1;	// machine running
 			recordSate = 1;
 	   } 
@@ -365,7 +366,8 @@ setInterval(function() {
 		if ( xTimeCount1 < GRAPH_MAX_COUNT ){
 			xTimeCount2 = xTimeCount1;
 		} else {
-			graphStartTime = new Date();
+			saveGraphImage(dataFileName);  
+			setGraphStart();
 			oscope.init();
 		}
 
@@ -406,28 +408,35 @@ function btnExit(){
 }
 
 function btnStart(){
-	testGraphImage( );
+	saveGraphImage( );
 }
 
 function btnStop(){
-	testGraphImage( );
+	// testGraphImage( );
 }
 
 
-function testGraphImage( ){
+function saveGraphImage(fileName ){
 
 	try{
 
- 		// scopeImage = m_canvas  = $("#oscope")[0];
-    	// m_context = m_canvas.getContext("2d");
- 		// scope.onPaint(fName);
-		//scope.writeTime(start,end);
+   	var startDateString = graphStartTime.toDateString();
+   	var startClock = graphStartTime.toLocaleTimeString();
+   	var start = "[ START = " + startDateString +':'+ startClock +" ]";
+
+   	var endTime = new Date();
+   	var endDateString = endTime.toDateString();
+   	var endClock = endTime.toLocaleTimeString();
+   	var end = "[ END = " + endDateString +':'+ endClock +" ]";
+
+		oscope.writeTime(start,end);
 
 		var scopeImage = $("#oscope")[0]; 
+
   		var dataUrl = scopeImage.toDataURL();
 		var buffer = new Buffer(dataUrl.split(",")[1], 'base64');
 
-		fs.writeFileSync('test.png',buffer,'base64',function(err){
+		fs.writeFileSync(fileName+'.png',buffer,'base64',function(err){
 			if(err){
 				console.log('Err writeFileSync saveGraphImage() : '+err);
 				throw 'could not open file : ' +err;
@@ -454,38 +463,6 @@ function getFileName(){
 	var fileName = 'data/'+endTime.getFullYear()+ endMonth + endDay + endHour + endMinute;
 
 	return fileName;
-}
-
-function saveGraphImage(fName){
-
-	try{
-
-  	var startDateString = graphStartTime.toDateString();
-  	var startClock = graphStartTime.toLocaleTimeString();
-	var start = "[ START = " + startDateString +':'+ startClock +" ]";
-
-  	var endTime = new Date();
-  	var endDateString = endTime.toDateString();
-  	var endClock = endTime.toLocaleTimeString();
-	var end = "[ END = " + endDateString +':'+ endClock +" ]";
-
-	scope.onPaint(fName);
-	scope.writeTime(start,end);
-
-  	var dataUrl = scopeImage.toDataURL();
-	var buffer = new Buffer(dataUrl.split(",")[1], 'base64');
-
-	fs.writeFileSync(fName+'.png',buffer,'base64',function(err){
-		if(err){
-			console.log('Err writeFileSync saveGraphImage() : '+err);
-			throw 'could not open file : ' +err;
-		}	
-	});
-	buffer = null;
-
-	} catch(e){
-		console.log(e);
-	}
 }
 
 function btnRestart(){

@@ -1,4 +1,4 @@
-const GRAPH_MAX_COUNT= 0.1 * 60 * 60; // 1 hour count
+const GRAPH_MAX_COUNT= 1 * 60 * 60; // 1 hour count
 
 var oscope = (function() {
   var m_canvas;
@@ -57,6 +57,7 @@ var oscope = (function() {
   ];
   var mid_div = [0,0,0,0];
 
+/*
   var hgrid_base = [
     [0.0,1.0/10.0,1.0,1.0/10.0],
     [0.0,2.0/10.0,1.0,2.0/10.0],
@@ -66,7 +67,7 @@ var oscope = (function() {
     [0.0,6.0/10.0,1.0,6.0/10.0],
     [0.0,7.0/10.0,1.0,7.0/10.0],
     [0.0,8.0/10.0,1.0,8.0/10.0],
-    [0.0,9.0/10.0,1.0,9.0/10.0],
+    [0.0,9.0/10.0,1.0,9.0/10.0]
   ];var hgrid;
 
   var vgrid_base = [
@@ -79,6 +80,33 @@ var oscope = (function() {
     [7.0/10.0,0.0,7.0/10.0,1.0],
     [8.0/10.0,0.0,8.0/10.0,1.0],
     [9.0/10.0,0.0,9.0/10.0,1.0]
+  ];
+  var vgrid;
+*/
+  var hgrid_base = [
+    [0.0,1.0/10.0,1.0,1.0/10.0],
+    [0.0,2.0/10.0,1.0,2.0/10.0],
+    [0.0,3.0/10.0,1.0,3.0/10.0],
+    [0.0,4.0/10.0,1.0,4.0/10.0],
+    [0.0,5.0/10.0,1.0,5.0/10.0],
+    [0.0,6.0/10.0,1.0,6.0/10.0],
+    [0.0,7.0/10.0,1.0,7.0/10.0],
+    [0.0,8.0/10.0,1.0,8.0/10.0],
+    [0.0,9.0/10.0,1.0,9.0/10.0]
+  ];var hgrid;
+
+  var vgrid_base = [
+    [ 1.0/12.0,0.0, 1.0/12.0,1.0],
+    [ 2.0/12.0,0.0, 2.0/12.0,1.0],
+    [ 3.0/12.0,0.0, 3.0/12.0,1.0],
+    [ 4.0/12.0,0.0, 4.0/12.0,1.0],
+    [ 5.0/12.0,0.0, 5.0/12.0,1.0],
+    [ 6.0/12.0,0.0, 6.0/12.0,1.0],
+    [ 7.0/12.0,0.0, 7.0/12.0,1.0],
+    [ 8.0/12.0,0.0, 8.0/12.0,1.0],
+    [ 9.0/12.0,0.0, 9.0/12.0,1.0],
+    [10.0/12.0,0.0,10.0/12.0,1.0],
+    [11.0/12.0,0.0,11.0/12.0,1.0]
   ];
   var vgrid;
 
@@ -139,7 +167,7 @@ var oscope = (function() {
   }
 
   function clear(ctx,width,height) {
-    ctx.fillStyle = "black";
+    ctx.fillStyle = "white";
     ctx.fillRect(0,0,width,height);
   }
 
@@ -176,14 +204,14 @@ var oscope = (function() {
 
     // draw the outline
     ctx.save();
-    ctx.strokeStyle = 'gray';
+    ctx.strokeStyle = 'darkgray';
     ctx.lineWidth   = 6;
     drawPath(ctx,outline);
     ctx.restore();
 
     // draw the grid
     ctx.save();
-    ctx.strokeStyle = "rgba(255,255,255,0.5)";
+    ctx.strokeStyle = "rgba(0,0,0,1.0)";
     ctx.lineWidth   = 1;
     ctx.setLineDash([1,1]);
     drawLines(ctx,hgrid);
@@ -194,59 +222,64 @@ var oscope = (function() {
   function drawAnnotations(ctx,width,height,dy)
   {
 
+	const T_SITE=10;
+	const V_SITE=880;
+	const P_SITE=800;
+
     var t;
     var y;
 	var delta = 40;
 	var dy_offset = 20;
 
+
     ctx.font = dy.toFixed(0) + "px monospace";
 
     y = dy_offset;
-	ctx.textAlign="left"; 
-    ctx.fillStyle = "#01a9db";
-    ctx.fillText('10kg/cm*2	'  ,10,y);
-    y += delta;
-    ctx.fillText('7.5',10,y);
-    y += delta;
-    ctx.fillText('5.0',10,y);
-    y += delta;
-    ctx.fillText('2.5',10,y);
-    y += delta;
-    ctx.fillText('0.0',10,y);
-    y += 12;
-    ctx.fillText('압력',10,y);
-
-
-    y = dy_offset;
-    ctx.fillStyle = "white";
-
-    ctx.fillText('   0',80,y);
-    y += delta;
-    ctx.fillText('- 25',80,y);
-    y += delta;
-    ctx.fillText('- 50',80,y);
-    y += delta;
-    ctx.fillText('- 75',80,y);
-    y += delta;
-    ctx.fillText('-100',80,y);
-    y += 12;
-    ctx.fillText('진공',80,y);
-
-    y = dy_offset;
 	ctx.textAlign="right"; 
-    ctx.fillStyle = "yellow";
-
-    ctx.fillText('200C',880,y);
+    ctx.fillStyle = "green";
+    ctx.fillText('10kg/cm*2	'  , P_SITE,y);
     y += delta;
-    ctx.fillText('150C',880,y);
+    ctx.fillText('7.5', P_SITE,y);
     y += delta;
-    ctx.fillText('100C',880,y);
+    ctx.fillText('5.0', P_SITE,y);
     y += delta;
-    ctx.fillText(' 50C',880,y);
+    ctx.fillText('2.5', P_SITE,y);
     y += delta;
-    ctx.fillText('  0C',880,y);
+    ctx.fillText('0.0', P_SITE,y);
     y += 12;
-    ctx.fillText('온도',880,y);
+    ctx.fillText('압력', P_SITE,y);
+
+
+    y = dy_offset;
+    ctx.fillStyle = "blue";
+
+    ctx.fillText('   0',V_SITE,y);
+    y += delta;
+    ctx.fillText('- 25',V_SITE,y);
+    y += delta;
+    ctx.fillText('- 50',V_SITE,y);
+    y += delta;
+    ctx.fillText('- 75',V_SITE,y);
+    y += delta;
+    ctx.fillText('-100',V_SITE,y);
+    y += 12;
+    ctx.fillText('진공',V_SITE,y);
+
+    y = dy_offset;
+	ctx.textAlign="left"; 
+    ctx.fillStyle = "red";
+
+    ctx.fillText('200C',T_SITE,y);
+    y += delta;
+    ctx.fillText('150C',T_SITE,y);
+    y += delta;
+    ctx.fillText('100C',T_SITE,y);
+    y += delta;
+    ctx.fillText(' 50C',T_SITE,y);
+    y += delta;
+    ctx.fillText('  0C',T_SITE,y);
+    y += 12;
+    ctx.fillText('온도',T_SITE,y);
 
     ctx.lineWidth   = 4;
     t = (m_run) ? ("RUN : " + m_updates.toFixed(0)) : "STOP";
@@ -266,6 +299,7 @@ var oscope = (function() {
   function onPaint(trace) {
     drawBackground(m_context,m_width,m_height,m_voffset);
     drawAnnotations(m_context,m_width,m_height,m_text_size);
+	 writeLegend(); 
   }
 
   function onVerticalOffset(channel,offset)
@@ -348,13 +382,63 @@ var oscope = (function() {
 
 		var tempOffset = [ 25, 1.25, 112.5, 112.5, 112.5, 112.5, 112.5, 112.5]; 
    	var ys = [ 200/250, 200/12.5, 200/125, 200/125, 200/125, 200/125, 200/125, 200/125];
-   	var fStyle=["green","#2ECCFA","magenta","darkgray","red","#FF8000","gray","purple"];
+   	var fStyle=["red","green","magenta","black","blue","#FF8000","darkgray","purple"];
 
 		for(i = 0; i < 8 ; i ++){
 	      ctx.fillStyle = fStyle[i-1];
    	   ctx.fillRect( gCount * hs, ( chData[i] * 1.0 + tempOffset[i-1]) * ys[i-1],2,2);    
 		}
 	}
+
+  function writeTime(start, end){
+
+      m_context.fillStyle = "black";
+
+      m_context.textAlign="left"; 
+      m_context.fillText(start,100,20);
+      m_context.textAlign="right"; 
+      m_context.fillText(end,690,20);
+   }
+
+   function writeLegend( ){
+
+		const Y_OFFSET = 195;
+      const DELTA_X = 70;
+      var x = 180;
+
+      m_context.textAlign="left"; 
+
+      m_context.fillStyle = "red";      
+      m_context.fillText('온도',x,Y_OFFSET);
+      
+      x = x+ DELTA_X;
+      m_context.fillStyle = "green";    
+      m_context.fillText('압력',x,Y_OFFSET);
+      
+      x = x+ DELTA_X;
+      m_context.fillStyle = "magenta";    
+      m_context.fillText('진공1',x,Y_OFFSET);
+      
+      x = x+ DELTA_X;
+      m_context.fillStyle = "black";      
+      m_context.fillText('진공2',x,Y_OFFSET);
+      
+      x = x+ DELTA_X;
+      m_context.fillStyle = "blue";     
+      m_context.fillText('진공3',x,Y_OFFSET);
+      
+      x = x+ DELTA_X;
+      m_context.fillStyle = "#FF8000";    
+      m_context.fillText('진공4',x,Y_OFFSET);
+
+      x = x+ DELTA_X;
+      m_context.fillStyle = "darkgray";      
+      m_context.fillText('진공5',x,Y_OFFSET);            
+
+      x = x+ DELTA_X;
+      m_context.fillStyle = "purple";     
+      m_context.fillText('진공6',x,Y_OFFSET);            
+   }
 
   return {
     init               : onInit,
@@ -364,7 +448,8 @@ var oscope = (function() {
     onSecondsPerDiv    : onSecondsPerDiv,
     onSamplesPerSecond : onSamplesPerSecond,
     onVoltageRange     : onVoltageRange,
-	 drawDot				  : drawDot
+	 drawDot				  : drawDot,
+		writeTime			: writeTime
   };
 
 })();
