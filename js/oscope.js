@@ -1,4 +1,4 @@
-const GRAPH_MAX_COUNT= 1 * 60 * 60; // 1 hour count
+const GRAPH_MAX_COUNT= 0.1 * 60 * 60; // 1 hour count
 
 var oscope = (function() {
   var m_canvas;
@@ -57,32 +57,6 @@ var oscope = (function() {
   ];
   var mid_div = [0,0,0,0];
 
-/*
-  var hgrid_base = [
-    [0.0,1.0/10.0,1.0,1.0/10.0],
-    [0.0,2.0/10.0,1.0,2.0/10.0],
-    [0.0,3.0/10.0,1.0,3.0/10.0],
-    [0.0,4.0/10.0,1.0,4.0/10.0],
-    [0.0,5.0/10.0,1.0,5.0/10.0],
-    [0.0,6.0/10.0,1.0,6.0/10.0],
-    [0.0,7.0/10.0,1.0,7.0/10.0],
-    [0.0,8.0/10.0,1.0,8.0/10.0],
-    [0.0,9.0/10.0,1.0,9.0/10.0]
-  ];var hgrid;
-
-  var vgrid_base = [
-    [1.0/10.0,0.0,1.0/10.0,1.0],
-    [2.0/10.0,0.0,2.0/10.0,1.0],
-    [3.0/10.0,0.0,3.0/10.0,1.0],
-    [4.0/10.0,0.0,4.0/10.0,1.0],
-    [5.0/10.0,0.0,5.0/10.0,1.0],
-    [6.0/10.0,0.0,6.0/10.0,1.0],
-    [7.0/10.0,0.0,7.0/10.0,1.0],
-    [8.0/10.0,0.0,8.0/10.0,1.0],
-    [9.0/10.0,0.0,9.0/10.0,1.0]
-  ];
-  var vgrid;
-*/
   var hgrid_base = [
     [0.0,1.0/10.0,1.0,1.0/10.0],
     [0.0,2.0/10.0,1.0,2.0/10.0],
@@ -110,10 +84,6 @@ var oscope = (function() {
   ];
   var vgrid;
 
-  // responsive sizes for canvas
-  // aspect ratio of available sizes needs to be 4 over 3
-  // and must fit the twitter boostrap grid size allocated
-  // responsive text size
   var text_size = [ 12, 8, 6 ];
 
   function rescale(w,h) {
@@ -375,33 +345,38 @@ var oscope = (function() {
   }
 
 	function drawDot(gCount, chData){
+		try{
+			var hs = 900 / GRAPH_MAX_COUNT;
+			var ctx = m_context;
+			var i;
 
-		var hs = 900 / GRAPH_MAX_COUNT;
-		var ctx = m_context;
-		var i;
+			var tempOffset = [ 25, 1.25, 112.5, 112.5, 112.5, 112.5, 112.5, 112.5]; 
+   		var ys = [ 200/250, 200/12.5, 200/125, 200/125, 200/125, 200/125, 200/125, 200/125];
+   		var fStyle=["red","green","aquamarine","black","blue","cyan","darkgray","aqua"];
 
-		var tempOffset = [ 25, 1.25, 112.5, 112.5, 112.5, 112.5, 112.5, 112.5]; 
-   	var ys = [ 200/250, 200/12.5, 200/125, 200/125, 200/125, 200/125, 200/125, 200/125];
-   	var fStyle=["red","green","magenta","black","blue","#FF8000","darkgray","purple"];
-
-		for(i = 0; i < 8 ; i ++){
-	      ctx.fillStyle = fStyle[i-1];
-   	   ctx.fillRect( gCount * hs, ( chData[i] * 1.0 + tempOffset[i-1]) * ys[i-1],2,2);    
+			for(i = 0; i < 8 ; i ++){
+	      	ctx.fillStyle = fStyle[i];
+   	   	ctx.fillRect( gCount * hs, 200 - ( chData[i] * 1.0 + tempOffset[i]) * ys[i],2,2);    
+			}
+		} catch ( err ){
+			alert("err oscope.drawDot()");
 		}
 	}
 
   function writeTime(start, end){
-
-      m_context.fillStyle = "black";
-
-      m_context.textAlign="left"; 
-      m_context.fillText(start,100,20);
-      m_context.textAlign="right"; 
-      m_context.fillText(end,690,20);
+		try{
+      	m_context.fillStyle = "black";
+      	m_context.textAlign="left"; 
+      	m_context.fillText(start,100,20);
+      	m_context.textAlign="right"; 
+      	m_context.fillText(end,690,20);
+		} catch(err){
+			alert("err oscope.writeTime()");
+		}
    }
 
    function writeLegend( ){
-
+		try{
 		const Y_OFFSET = 195;
       const DELTA_X = 70;
       var x = 180;
@@ -416,7 +391,7 @@ var oscope = (function() {
       m_context.fillText('압력',x,Y_OFFSET);
       
       x = x+ DELTA_X;
-      m_context.fillStyle = "magenta";    
+      m_context.fillStyle = "aquamarine";    
       m_context.fillText('진공1',x,Y_OFFSET);
       
       x = x+ DELTA_X;
@@ -428,7 +403,7 @@ var oscope = (function() {
       m_context.fillText('진공3',x,Y_OFFSET);
       
       x = x+ DELTA_X;
-      m_context.fillStyle = "#FF8000";    
+      m_context.fillStyle = "cyan";    
       m_context.fillText('진공4',x,Y_OFFSET);
 
       x = x+ DELTA_X;
@@ -436,8 +411,11 @@ var oscope = (function() {
       m_context.fillText('진공5',x,Y_OFFSET);            
 
       x = x+ DELTA_X;
-      m_context.fillStyle = "purple";     
+      m_context.fillStyle = "aqua";     
       m_context.fillText('진공6',x,Y_OFFSET);            
+		} catch(err){
+			alert("err oscope.writeLegend()");
+		}	
    }
 
   return {
@@ -449,7 +427,7 @@ var oscope = (function() {
     onSamplesPerSecond : onSamplesPerSecond,
     onVoltageRange     : onVoltageRange,
 	 drawDot				  : drawDot,
-		writeTime			: writeTime
+	 writeTime			: writeTime
   };
 
 })();
