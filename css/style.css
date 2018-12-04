@@ -4,15 +4,8 @@ html, body {
 	background: white;
 }
 
-.wrapper{
-	display: grid;
-	grid-template-columns: repeat(2, 1fr);
-	grid-gap : 0px;
- 	grid-auto-rows: minmax(100px, auto);
-}
-
-.td{
-	text-align:center;
+.tr .td{
+	text-align : center;
 }
 
 

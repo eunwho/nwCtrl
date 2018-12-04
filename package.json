@@ -5,10 +5,10 @@
 	"license": "MIT",
 	"window": {
 		"title": "node-webkit demo",
-		"toolbar": true,
+		"toolbar": false,
 		"frame": false,
 		"show": true,
-		"fullscreen": true,
+		"fullscreen": false,
 		"width": 480,
 		"height": 320,
 		"position": "center",
@@ -17,7 +17,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/eunwho/piNw.git"
+		"url": "https://github.com/eunwho/nwCtrl.git"
 	},
 	"dependencies": {
 		"canvas-gauges": "^2.1.4",
