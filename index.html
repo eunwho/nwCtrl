@@ -8,8 +8,8 @@
 <link href="css/yeti.min.css" rel="stylesheet"/>
 <link href="css/style.css" rel="stylesheet"/>
 <link href="css/w3.css" rel="stylesheet"/>
-<!-- link rel="stylesheet" href="../fonts/fonts.css"-->
 
+<script src="js/canvasjs.min.js"></script>
 <script src="canvas-gauges-master/gauge.min.js"></script>
 <script src="js/jquery.min.js"></script>
 <script src="js/oscope.js"></script>
@@ -17,30 +17,16 @@
 </head>
 <body>
 
+<div id="chartContainer" style="height:200px; width: 100%;"></div>
+
 <div class="wrapper">
 	<table align="center">
-		<tr> 
-			<td> 
-				<span id='clock1' class='titleName'>2018:02:07</span> 
-			</td> 
-			<td>
-				<span id='clock2' class='titleName'>화요일</span>
-				<span id='clock3' class='titleName'>10:10:00</span>
-			</td>
-		</tr>
 		<tr>
 			<td>
-				<canvas id="gauge1" class='cssGauge' data-type="radial-gauge" data-value-box="false" data-width="170" data-height="170"></canvas>
+				<canvas id="gauge1" class="cssGauge" data-type="linear-gauge" data-width="220" data-height="80"></canvas>
 			</td>
 			<td>
-				<canvas id="gauge2" class='cssGauge' data-type="radial-gauge" data-value-box="false" data-width="170" data-height="170"></canvas>
-			</td>
-		</tr>
-		<tr>
-			<td> <h2>온도</h2> </td>
-			<td> 
-				<span>습도 </span>
-				<button id='btnExit' class='w3-button w3-round w3-red w3-large' onclick='btnExit()'>Exit</button>
+				<canvas id="gauge2" class="cssGauge" data-type="linear-gauge" data-width="220" data-height="80"></canvas>
 			</td>
 		</tr>
 	</table>
