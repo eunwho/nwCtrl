@@ -38,7 +38,7 @@ var i2c = require('i2c-bus');
 var piI2c = i2c.openSync(1);
 
 piI2c.scan(function(err,res){
-   if(err) console.log(err);
+   if(err) console.log(err.message);
    else     console.log(res);
 });
 
@@ -150,7 +150,6 @@ function getClockStr(){
 	
 function setGraphStart(){
 
-	var dataOut = '=======================================\r\n';
 	recordState = 1;
 	graphStartTime = new Date();	
 	oscope.init();
@@ -160,40 +159,19 @@ function setGraphStart(){
 
 	var dFileName = dataFileName + '.dat';				
 
-	dataOut = '=======================================\r\n';
-   fs.appendFile(dFileName, dataOut, 'utf8', function(err){
-		if(err) {
-			alert("error appendFile 2 :");
-		}
-	});
-
-	dataOut = '    일성화이바 오토크레브 동작 데이터 \r\n';
-   fs.appendFile(dFileName, dataOut, 'utf8', function(err){
-		if(err) {
-			alert("error appendFile 2 :");
-		}
-	});
-
-	dataOut = '시작시간 = ';
+	var dataOut = '=======================================\r\n';
+	dataOut	+= '    일성화이바 오토크레브 동작 데이터 \r\n';
+	dataOut += '시작시간 = ';
 	dataOut += startTime.toLocaleDateString() + ':';
 	dataOut += startTime.toLocaleTimeString()+ '\r\n';
-   fs.appendFile(dFileName, dataOut, 'utf8', function(err){
-		if(err) {
-			alert("error appendFile 2 :");
-		}
-	});
+	dataOut += '=======================================\r\n';
+	dataOut += '초\t온도\t압력\t진공1\t진공2\t진공3\t진공4\t진공5\t진공6 \r\n';
 
-	dataOut = '=======================================\r\n';
-   fs.appendFile(dFileName, dataOut, 'utf8', function(err){
+   fs.writeFile(dFileName, dataOut, 'utf8', function(err){
 		if(err) {
-			alert("error appendFile 2 :");
-		}
-	});
-
-	dataOut = '초\t온도\t압력\t진공1\t진공2\t진공3\t진공4\t진공5\t진공6 \r\n';
-   fs.appendFile(dFileName, dataOut, 'utf8', function(err){
-		if(err) {
-			alert("error appendFile 3 :");
+			console.error("write error : "+ err.message);
+		} else {
+			console.log("start and record head filename = "+dFileName);
 		}
 	});
 }
@@ -236,17 +214,18 @@ function getAdcValue(){
 		}
 	}
 		// console.log(traceData.channel);
-	} catch(e) {
+	} catch(err) {
 		console.log('AT = ' + getClockStr());
-		console.log('SPI ADC error = ',e);
+		console.log('SPI ADC error = ',err.message);
 	}
 }
 
 function digitalInputProc( byteInput ){
+
 	var temp = 1;
 	if( 255 === byteInput ){
 		return;
-	} else if ( 255 <= byteInput ){
+	} else if ( 255 < byteInput ){
 		console.log('input error = '+byteInput);
 		return;
 	}
@@ -262,33 +241,18 @@ function digitalInputProc( byteInput ){
 				recordState = 0;
   				document.getElementById('endTimeStamp').innerHTML = getClockStr( );
 				document.getElementById('elapedTimeStamp').innerHTML = getElapsedTime(startTime);    
-				// myEmitter.emit('saveGraph');
-				// myEmitter.emit('saveGraph',{f:dataFileName});
 				saveGraphImage(dataFileName);  
 			} 
 		}else{
 			machineState = 0;	recordState = 0;
 		}
 	} else {	// start input ON
-		if( machineState === 0 ){
+		if( machineState === 0 ){ // machine start input 
 			// myEmitter.emit('startGraph');				
 			startTime = new Date();	
 			setGraphStart();
 		}
-		var recordTime = new Date();
-		var recordNumber = Math.floor((recordTime.getTime() - graphStartTime.getTime())/1000);
 
-		var dataOut =  recordNumber +'\t';
-		for( var i = 0; i < 8 ; i++){
-			dataOut += traceData.channel[i] + '\t';
-		}	
-/*
-		dataOut +='\r\n';			
-      fs.appendFile(dataFileName+'.dat',dataOut,'utf8',function(err){
-			if(err) throw err;
-			console.log('append to file = ' + dataFileName + '.dat'); 
-		});
-*/
 		machineState = 1;	// machine running
 		recordSate = 1;
 	} 
@@ -383,10 +347,10 @@ function updateGauge(gaugeData){
 	}
 }
 
-setInterval(function() {
+//setInterval(function() {
+(function loop() {
 
 	getAdcValue();	// upDate traceData.channel 
-
 	var promise = readMcp23017(ADDR_IN1,0); 
   promise
   .then(function(byte){
@@ -399,40 +363,51 @@ setInterval(function() {
     console.log(err.message);
   });
 
-	updateGauge(traceData.channel);
 
 	try{
 
-	document.getElementById('stater').innerHTML = (machineState) ? '동작중' : '대기중';    
+		var nowClock = getClockStr();
+		updateGauge(traceData.channel);
+		document.getElementById('stater').innerHTML = (machineState) ? '동작중' : '대기중';    
+		document.getElementById('clock1').innerHTML = nowClock;
+		console.log(nowClock);
 
-	var nowClock = getClockStr();
-	document.getElementById('clock1').innerHTML = nowClock;
-	console.log(nowClock);
+		if(machineState){ 
 
-	if(machineState){ 
+			var tempTime = new Date();
+			var elapedTime = tempTime-graphStartTime;
+			var xTimeCount1 = elapedTime/1000;
+			var xTimeCount2 = 0;		
 
-		var tempTime = new Date();
-		var elapedTime = tempTime-graphStartTime;
-		var xTimeCount1 = elapedTime/1000;
-		var xTimeCount2 = 0;
-		
-		if ( xTimeCount1 < GRAPH_MAX_COUNT ){
-			xTimeCount2 = xTimeCount1;
-		} else {
-			// myEmitter.emit('saveGraph',dataFileName);
-			saveGraphImage(dataFileName);  
-			// oscope.init();
-			setGraphStart();
+			if ( xTimeCount1 < GRAPH_MAX_COUNT ){
+				xTimeCount2 = xTimeCount1;
+/*
+				var dataOut =  xTimeCount2 +'\t';
+				for( var i = 0; i < 8 ; i++){
+					dataOut += traceData.channel[i] + '\t';
+				}	
+				dataOut +='\r\n';			
+      		fs.appendFile(dataFileName+'.dat',dataOut,'utf8',function(err){
+					if(err) throw err;
+					console.log('append to file = ' + dataFileName + '.dat'); 
+				});
+*/
+			} else {
+				//saveGraphImage(dataFileName);  
+				//setGraphStart();
+				graphStartTime = new Date();
+				oscope.init();
+			}
+
+			document.getElementById('elapedTimeStamp').innerHTML = getElapsedTime(startTime);    
+			oscope.drawDot(xTimeCount2, traceData.channel);
 		}
-
-		document.getElementById('elapedTimeStamp').innerHTML = getElapsedTime(startTime);    
-		oscope.drawDot(xTimeCount2, traceData.channel);
-	}
 	}catch(err) {
 		console.log(err.message);
 	}
-},2000);
 
+	setTimeout(loop, 3000);
+})();
 
 var exec = require('child_process').exec;
 
@@ -644,10 +619,6 @@ $("document").ready(function() {
    	initPressGauge("rGauge2");
 
    	startTime = new Date();
-		// var n = startTime.toDateString();
-		// var time = startTime.toLocaleTimeString();
-		// document.getElementById('startTimeStamp').innerHTML = n +':'+ time;
-		// document.getElementById('endTimeStamp').innerHTML = n +':'+ time;
 		document.getElementById('startTimeStamp').innerHTML = getClockStr( );
 		document.getElementById('endTimeStamp').innerHTML = getClockStr( );
 	}catch(err){
@@ -660,24 +631,4 @@ process.on('exit', function () {
     rpio.spiEnd();
     process.exit(0);
 });
-
-/*
-myEmitter.on('startGraph',function( ){
-	try{
-		setGraphStart();
-	}catch(err){
-		console.log('error setGraphStart()');
-		console.log(err);
-	}
-});
-
-myEmitter.on('saveGraph',function( ){
-	try{
-		saveGraphImage(dataFileName);
-	}catch(err){
-		console.log('error saveGraphImage()');
-		console.log(err);
-	}
-});
-*/
 		
