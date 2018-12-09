@@ -38,7 +38,7 @@ var i2c = require('i2c-bus');
 var piI2c = i2c.openSync(1);
 
 piI2c.scan(function(err,res){
-   if(err) console.log(err.message);
+   if(err) console.log(err);
    else     console.log(res);
 });
 
@@ -54,6 +54,8 @@ var inMcp23017=[0,0,0,0];
 var digitalOutBuf = [0];
 
 var channel = 0;
+// var adcOffset = [630,630,630,630,630,630,630,630];
+
 var traceData = {channel:[0,0,0,0,0,0,0,0],State:0};
 
 piI2c.writeByteSync(ADDR_OUT1,0,0,function(err){
@@ -148,6 +150,7 @@ function getClockStr(){
 	
 function setGraphStart(){
 
+	var dataOut = '=======================================\r\n';
 	recordState = 1;
 	graphStartTime = new Date();	
 	oscope.init();
@@ -157,19 +160,40 @@ function setGraphStart(){
 
 	var dFileName = dataFileName + '.dat';				
 
-	var dataOut = '=======================================\r\n';
-	dataOut	+= '    일성화이바 오토크레브 동작 데이터 \r\n';
-	dataOut += '시작시간 = ';
+	dataOut = '=======================================\r\n';
+   fs.appendFile(dFileName, dataOut, 'utf8', function(err){
+		if(err) {
+			alert("error appendFile 2 :");
+		}
+	});
+
+	dataOut = '    일성화이바 오토크레브 동작 데이터 \r\n';
+   fs.appendFile(dFileName, dataOut, 'utf8', function(err){
+		if(err) {
+			alert("error appendFile 2 :");
+		}
+	});
+
+	dataOut = '시작시간 = ';
 	dataOut += startTime.toLocaleDateString() + ':';
 	dataOut += startTime.toLocaleTimeString()+ '\r\n';
-	dataOut += '=======================================\r\n';
-	dataOut += '초\t온도\t압력\t진공1\t진공2\t진공3\t진공4\t진공5\t진공6 \r\n';
-
-   fs.writeFile(dFileName, dataOut, 'utf8', function(err){
+   fs.appendFile(dFileName, dataOut, 'utf8', function(err){
 		if(err) {
-			console.error("write error : "+ err.message);
-		} else {
-			console.log("start and record head filename = "+dFileName);
+			alert("error appendFile 2 :");
+		}
+	});
+
+	dataOut = '=======================================\r\n';
+   fs.appendFile(dFileName, dataOut, 'utf8', function(err){
+		if(err) {
+			alert("error appendFile 2 :");
+		}
+	});
+
+	dataOut = '초\t온도\t압력\t진공1\t진공2\t진공3\t진공4\t진공5\t진공6 \r\n';
+   fs.appendFile(dFileName, dataOut, 'utf8', function(err){
+		if(err) {
+			alert("error appendFile 3 :");
 		}
 	});
 }
@@ -219,7 +243,6 @@ function getAdcValue(){
 }
 
 function digitalInputProc( byteInput ){
-
 	var temp = 1;
 	if( 255 === byteInput ){
 		return;
@@ -239,18 +262,33 @@ function digitalInputProc( byteInput ){
 				recordState = 0;
   				document.getElementById('endTimeStamp').innerHTML = getClockStr( );
 				document.getElementById('elapedTimeStamp').innerHTML = getElapsedTime(startTime);    
+				// myEmitter.emit('saveGraph');
+				// myEmitter.emit('saveGraph',{f:dataFileName});
 				saveGraphImage(dataFileName);  
 			} 
 		}else{
 			machineState = 0;	recordState = 0;
 		}
 	} else {	// start input ON
-		if( machineState === 0 ){ // machine start input 
+		if( machineState === 0 ){
 			// myEmitter.emit('startGraph');				
 			startTime = new Date();	
 			setGraphStart();
 		}
+		var recordTime = new Date();
+		var recordNumber = Math.floor((recordTime.getTime() - graphStartTime.getTime())/1000);
 
+		var dataOut =  recordNumber +'\t';
+		for( var i = 0; i < 8 ; i++){
+			dataOut += traceData.channel[i] + '\t';
+		}	
+/*
+		dataOut +='\r\n';			
+      fs.appendFile(dataFileName+'.dat',dataOut,'utf8',function(err){
+			if(err) throw err;
+			console.log('append to file = ' + dataFileName + '.dat'); 
+		});
+*/
 		machineState = 1;	// machine running
 		recordSate = 1;
 	} 
@@ -345,11 +383,10 @@ function updateGauge(gaugeData){
 	}
 }
 
-//setInterval(function() {
-(function loop() {
+setInterval(function() {
 
-/*
 	getAdcValue();	// upDate traceData.channel 
+
 	var promise = readMcp23017(ADDR_IN1,0); 
   promise
   .then(function(byte){
@@ -361,63 +398,41 @@ function updateGauge(gaugeData){
   }).catch(function(err){
     console.log(err.message);
   });
-*/
-	machineState = 1;
-	try{ 
-		var temp =0; 
-		temp = 25.0 +  Math.round( Math.random() *(-10));
-		traceData.channel[0] = temp;
 
-		temp = 3.0 +  Math.round( Math.random() *(-10.0))/10.0;
-		traceData.channel[1] = temp;
+	updateGauge(traceData.channel);
 
-		for(var i = 2 ; i < 8 ; i++ ){  
-			temp = -50.0 +  Math.round( Math.random() *( 10));
-			traceData.channel[i] = temp;
+	try{
+
+	document.getElementById('stater').innerHTML = (machineState) ? '동작중' : '대기중';    
+
+	var nowClock = getClockStr();
+	document.getElementById('clock1').innerHTML = nowClock;
+	console.log(nowClock);
+
+	if(machineState){ 
+
+		var tempTime = new Date();
+		var elapedTime = tempTime-graphStartTime;
+		var xTimeCount1 = elapedTime/1000;
+		var xTimeCount2 = 0;
+		
+		if ( xTimeCount1 < GRAPH_MAX_COUNT ){
+			xTimeCount2 = xTimeCount1;
+		} else {
+			// myEmitter.emit('saveGraph',dataFileName);
+			saveGraphImage(dataFileName);  
+			// oscope.init();
+			setGraphStart();
 		}
 
-		var nowClock = getClockStr();
-		updateGauge(traceData.channel);
-		document.getElementById('stater').innerHTML = (machineState) ? '동작중' : '대기중';    
-		document.getElementById('clock1').innerHTML = nowClock;
-		console.log(nowClock);
-
-		if(machineState){ 
-
-			var tempTime = new Date();
-			var elapedTime = tempTime-graphStartTime;
-			var xTimeCount1 = elapedTime/1000;
-			var xTimeCount2 = 0;		
-
-			if ( xTimeCount1 < GRAPH_MAX_COUNT ){
-				xTimeCount2 = xTimeCount1;
-/*
-				var dataOut =  xTimeCount2 +'\t';
-				for( var i = 0; i < 8 ; i++){
-					dataOut += traceData.channel[i] + '\t';
-				}	
-				dataOut +='\r\n';			
-      		fs.appendFile(dataFileName+'.dat',dataOut,'utf8',function(err){
-					if(err) throw err;
-					console.log('append to file = ' + dataFileName + '.dat'); 
-				});
-*/
-			} else {
-				//saveGraphImage(dataFileName);  
-				//setGraphStart();
-				graphStartTime = new Date();
-				oscope.init();
-			}
-
-			document.getElementById('elapedTimeStamp').innerHTML = getElapsedTime(startTime);    
-			oscope.drawDot(xTimeCount2, traceData.channel);
-		}
+		document.getElementById('elapedTimeStamp').innerHTML = getElapsedTime(startTime);    
+		oscope.drawDot(xTimeCount2, traceData.channel);
+	}
 	}catch(err) {
 		console.log(err.message);
 	}
+},500);
 
-	setTimeout(loop, 2000);
-})();
 
 var exec = require('child_process').exec;
 
@@ -472,9 +487,8 @@ function saveGraphImage(fileName ){
 
 		fs.writeFile(fileName+'.png',buffer,'base64',function(err){
 			if(err){
-				//throw 'could not open file : ' +err;
-				alert('graph file writeFile Error :' + fileName + '.png');
-				console.log('Err writeFileSync saveGraphImage() : '+ err);
+				console.log('Err writeFileSync saveGraphImage() : '+ err.message);
+				throw err;
 			}	
 		});
 		// buffer = null;
@@ -523,7 +537,6 @@ function initTempGauge(gId){
    $(a).attr('data-stroke-ticks',true);
 	$(a).attr('data-highlights',
 		'[ {"from": 0, "to": 170, "color": "rgba(0,255, 0, .3)"},{"from": 170, "to": 250, "color": "rgba(255,0, 0, .5)"} ]');
-   $(a).attr('data-animation-duration',100);
 }
 
 function initPressGauge(gId){
@@ -556,7 +569,6 @@ function initVacuGauge(gId){
 
 function initGauge(gId){
    var a = 'canvas[id=' + gId + ']';
-
    $(a).attr('data-ticks-angle',275);
    $(a).attr('data-start-angle',45);
    $(a).attr('data-value-text-shadow',"true");
@@ -573,6 +585,7 @@ function initGauge(gId){
    $(a).attr('data-needle-circle-size',7);
    $(a).attr('data-needle-circle-outer',true);
    $(a).attr('data-needle-circle-inner',false);
+   $(a).attr('data-animation-duration',1500);
    $(a).attr('data-animation-rule',"linear");
 	$(a).attr('data-color-border-outer',"#333");
    $(a).attr('data-color-border-outer-end',"#111");
@@ -593,7 +606,6 @@ function initGauge(gId){
    $(a).attr('data-value-box-text',100);
    $(a).attr('data-value-box-text-shadow',false);
    $(a).attr('data-value-box-border-radius',0);
-   $(a).attr('data-animation-duration',10);
 }
 
 function errMsgOut(input){ 
@@ -618,20 +630,23 @@ $("document").ready(function() {
 	try{
    	if (oscope) oscope.init();
 
-   	for(var i = 1 ; i < 9 ; i ++){
+   	for(i = 1 ; i<9 ; i ++){
       	var gId = 'rGauge' + i;  
       	initGauge( gId );
    	}
 
-   	for(var i = 3 ; i < 9 ; i ++){
+   	for(i = 3 ; i<9 ; i ++){
       	var gId = 'rGauge' + i;  
       	initVacuGauge( gId );
    	}
-
    	initTempGauge("rGauge1");
    	initPressGauge("rGauge2");
 
    	startTime = new Date();
+		// var n = startTime.toDateString();
+		// var time = startTime.toLocaleTimeString();
+		// document.getElementById('startTimeStamp').innerHTML = n +':'+ time;
+		// document.getElementById('endTimeStamp').innerHTML = n +':'+ time;
 		document.getElementById('startTimeStamp').innerHTML = getClockStr( );
 		document.getElementById('endTimeStamp').innerHTML = getClockStr( );
 	}catch(err){
@@ -644,4 +659,24 @@ process.on('exit', function () {
     rpio.spiEnd();
     process.exit(0);
 });
+
+/*
+myEmitter.on('startGraph',function( ){
+	try{
+		setGraphStart();
+	}catch(err){
+		console.log('error setGraphStart()');
+		console.log(err);
+	}
+});
+
+myEmitter.on('saveGraph',function( ){
+	try{
+		saveGraphImage(dataFileName);
+	}catch(err){
+		console.log('error saveGraphImage()');
+		console.log(err);
+	}
+});
+*/
 		
