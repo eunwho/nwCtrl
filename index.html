@@ -21,31 +21,33 @@
 
 <table id="table-container" >
 		<td> <canvas id="rGauge1" class='cssGauge' data-type="radial-gauge" data-value-box="false" data-width="193" data-height="193"></canvas></td>
-		
+
+
 		<td>
-			<table>
+			<table width="614px" height="200">
 				<tr>
-					<td id="stater" class="title1">대기중</td>
-					<td id="subtitle">ILSUNG FIBER AUTO CLAVE</td>
+					<td align="center" bgcolor="skyblue" width="90px" height="40px">대기중</td>
+					<td colspan="3" bgcolor="yellow" align="center">ILSUNG FIBER CLAVER</td>
+				</tr>
+				<tr height="40px">
+					<td align="center" bgcolor="yellow">시작시간</td>
+					<td bgcolor="white">2018:02:07: 10:10:00</td>
+					<td align="center" bgcolor="yellow">경과시간</td>
+					<td bgcolor="white">10 hour : 10 min: 00 sec</td>
+				</tr>
+				<tr height="40px">
+					<td align="center" bgcolor="white">완료시간</td>
+					<td bgcolor="yellow">end Time</td>
+					<td align="center" bgcolor="white">현재시간</td>
+					<td bgcolor="yellow">now time</td>
 				</tr>
 				<tr>
-					<td class='label2'>시작시간</td> 
-					<td id='startTimeStamp' class='label1'>2018:02:07: 10:10:00 </td>
-					<td class='label2'>경과시간</td>
-					<td id='elapedTimeStamp' class='label1'> 10 hour : 10 min: 00 sec </td>
+					<td colspan="4" bgcolor="red">Auto clave error message box</td>
 				</tr>
-				<tr>
-					<td class="label2">완료시간</td>
-					<td id='endTimeStamp' class='label1'>end Time</td>
-					<td class='label2'>현재시간</td>
-					<td id='clock1' class='label1'>now time</td>
-				</tr>
-				<tr id="rxMsg"> auto clave error message box
-			<!--	<tr id='rxMsg'> auto clave error message box -->
-				</tr>
-			</table>
+         </table>
 		</td>
 		
+
 		<td><canvas id="rGauge2" class='cssGauge' data-type="radial-gauge" data-value-box="false" data-width="193" data-height="193"></canvas></td>
 </table>	
 
@@ -53,16 +55,15 @@
 	<div id="oscope-parent" class="csOscope">
 		<canvas id="oscope" class="oscope-canvas" width="900" height="200"></canvas>
 	</div>
+		<table>		
+			<button id='btnStart' 	class='w3-button w3-round w3-green  w3-large' onclick='btnStart()'>RUN1</button>
+			<button id='btnStop' 	class='w3-button w3-round w3-blue   w3-large' onclick='btnStop()'>RUN2</button>
+			<button id='btnRestart' class='w3-button w3-round w3-indigo w3-large' onclick='btnRestart()'>CLEAR</button>
+			<button id='btnNoVac' 	class='w3-button w3-round w3-red  w3-large' onclick='btnExit()'>작업완료</button>
+		</table>
 </div>
 
-<div id='btnBox'>
-	<table>		
-		<button id='btnStart' 	class='w3-button w3-round w3-green  w3-large' onclick='btnStart()'>RUN1</button>
-		<button id='btnStop' 	class='w3-button w3-round w3-blue   w3-large' onclick='btnStop()'>RUN2</button>
-		<button id='btnRestart' class='w3-button w3-round w3-indigo w3-large' onclick='btnRestart()'>CLEAR</button>
-		<button id='btnNoVac' 	class='w3-button w3-round w3-red  w3-large' onclick='btnExit()'>작업완료</button>
-	</table>
-</div>
+
 <div class='gaugeBox'>
 	<table>
 		<td><canvas id="rGauge3" class='cssGauge' data-type="radial-gauge" data-value-box="false" data-width="168" data-height="168"></canvas></td>
