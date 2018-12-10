@@ -19,7 +19,7 @@ html, body {
 }
 
 .title1{
-	width:auto;
+	width: 90px;
 	margin: 30px;
 	text-align:center;
 	font-size: 25px;
@@ -27,6 +27,18 @@ html, body {
 	font-wieght : bold;
 	font-family: FF DIN;
 	color			: yellow;
+}
+
+#subtitle{
+	margin-left: 40px;
+	font-wieght : bold;
+	font-family: FF DIN;
+	color			: red;
+	text-align:center;
+	margin:5px;
+	padding:2px;
+	font-size:1.50em;
+
 }
 
 .title2{
@@ -65,12 +77,6 @@ html, body {
 	font-size:1.20em;
 	font-wieght : bold;
 */
-}
-#subtitle{
-	margin-left: 10px;
-	font-wieght : bold;
-	font-family: FF DIN;
-	color			: red;
 }
 
 .label1{
@@ -134,7 +140,7 @@ html, body {
 #rxMsg{
 	align: center;
    width: 900px;
-   height: 80px;
+   height: 150px;
    margin-top: 5px;
    text-align: left;
 	color: white;
@@ -143,7 +149,7 @@ html, body {
 }
 
 #canvas_box{
-	margin-top: 30px;
+	margin-top: 0px;
 }
 
 #btnBox{
@@ -183,5 +189,5 @@ html, body {
 
 .gaugeBox{
 	position: relative;
-	margin-top: -70px;
+	margin-top: -60px;
 }
