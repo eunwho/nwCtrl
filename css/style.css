@@ -14,8 +14,9 @@ html, body {
 }
 
 #table-container{
-	width: 1000px;
+	width: 1015px;
 	height: 250px;
+	margin-top: 20px;
 }
 
 #stater{
@@ -110,7 +111,14 @@ html, body {
 
 
 #canvas_box{
-	margin-top: 0px;
+	width: 1015px;
+	height: 300px;
+	margin-top: -10px;
+}
+
+#oscope{
+	width: 900px;
+	height: 280px;
 }
 
 #btnBox{
@@ -121,35 +129,51 @@ html, body {
 	position: relative;
 	width: 110px;
 	height: 45px;
-	margin-top: -395px;
-	margin-left: 905px;
+	margin-top: -550px;
+	margin-left: 902px;
 }
 
 #btnStop{
 	position: relative;
 	width: 110px;
 	height: 45px;
-	margin-top: -335px;
-	margin-left: 905px;
+	margin-top: -500px;
+	margin-left: 902px;
+}
+
+#btnStart1{
+	position: relative;
+	width: 110px;
+	height: 45px;
+	margin-top: -450px;
+	margin-left: 902px;
+}
+
+#btnStop1{
+	position: relative;
+	width: 110px;
+	height: 45px;
+	margin-top: -400px;
+	margin-left: 902px;
 }
 
 #btnRestart{
 	position: relative;
 	width: 110px;
 	height: 45px;
-	margin-top: -275px;
-	margin-left: 905px;
+	margin-top: -350px;
+	margin-left: 902px;
 }
 
 #btnNoVac{
 	position: relative;
 	width: 110px;
 	height: 45px;
-	margin-top: -215px;
-	margin-left: 905px;
+	margin-top: -300px;
+	margin-left: 902px;
 }
 
 .gaugeBox{
 	position: relative;
-	margin-top: -70px;
+	margin-top: 5px;
 }

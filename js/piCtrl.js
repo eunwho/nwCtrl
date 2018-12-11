@@ -221,9 +221,8 @@ function getAdcValue(){
 function digitalInputProc( byteInput ){
 
 	var temp = 1;
-	if( 255 === byteInput ){
-		return;
-	} else if ( 255 < byteInput ){
+	
+	if ( 255 < byteInput ){
 		console.log('input error = '+byteInput);
 		return;
 	}
@@ -232,7 +231,7 @@ function digitalInputProc( byteInput ){
    temp =  (inMcp23017[0] & 1 );
 
 	if( temp !== 0 ){
-		if ( machineState === 1 ) {  //리
+		if ( machineState !== 0 ) {  //리
 			recordState ++;
 			if(recordState > 2 ) {
 				machineState = 0; // machine ready
@@ -246,11 +245,9 @@ function digitalInputProc( byteInput ){
 		}
 	} else {	// start input ON
 		if( machineState === 0 ){ // machine start input 
-			// myEmitter.emit('startGraph');				
 			startTime = new Date();	
 			setGraphStart();
 		}
-
 		machineState = 1;	// machine running
 		recordSate = 1;
 	} 
@@ -348,7 +345,6 @@ function updateGauge(gaugeData){
 //setInterval(function() {
 (function loop() {
 
-/*
 	getAdcValue();	// upDate traceData.channel 
 	var promise = readMcp23017(ADDR_IN1,0); 
   promise
@@ -361,8 +357,7 @@ function updateGauge(gaugeData){
   }).catch(function(err){
     console.log(err.message);
   });
-*/
-	machineState = 1;
+
 	try{ 
 		var temp =0; 
 		temp = 25.0 +  Math.round( Math.random() *(-10));

@@ -23,7 +23,7 @@
 		<td> <canvas id="rGauge1" class='cssGauge' data-type="radial-gauge" data-value-box="false" data-width="193" data-height="193"></canvas></td>
 
 		<td>
-			<table width="614px" height="220">
+			<table width="614px" height="180">
 				<tr>
 					<td id="stater" align="center" bgcolor="black" width="90px" height="40px">대기중</td>
 					<td id="subtitle" colspan="3" bgcolor="black" align="center">ILSUNG FIBER CLAVER</td>
@@ -52,11 +52,13 @@
 
 <div id='canvas_box'>
 	<div id="oscope-parent" class="csOscope">
-		<canvas id="oscope" class="oscope-canvas" width="900" height="200"></canvas>
+		<canvas id="oscope" class="oscope-canvas"></canvas>
 	</div>
 		<table>		
 			<button id='btnStart' 	class='w3-button w3-round w3-green  w3-large' onclick='btnStart()'>RUN1</button>
 			<button id='btnStop' 	class='w3-button w3-round w3-blue   w3-large' onclick='btnStop()'>RUN2</button>
+			<button id='btnStart1' 	class='w3-button w3-round w3-yellow  w3-large' onclick='btnStart()'>Run3</button>
+			<button id='btnStop1' 	class='w3-button w3-round w3-gray  w3-large' onclick='btnStop()'>Run4</button>
 			<button id='btnRestart' class='w3-button w3-round w3-indigo w3-large' onclick='btnRestart()'>CLEAR</button>
 			<button id='btnNoVac' 	class='w3-button w3-round w3-red  w3-large' onclick='btnExit()'>작업완료</button>
 		</table>
