@@ -18,19 +18,60 @@ html, body {
 	height: 250px;
 }
 
+#stater{
+	font-size: 25px;
+   line-height: 20px;
+   font-weight : bold;
+   font-family: FF DIN;
+   color       : yellow;
+   text-shadow: 0 0 5px #fff,
+         0 0 20px #fff,
+         0 0 30px #fff,
+         0 0 40px #ff8000,
+         0 0 70px #ff8000,
+         0 0 90px #ff8000,
+         0 0 130px #ff8000,
+         0 0 180px #ff8000;
+}
 
+
+#subtitle{
+	font-weight: bold;
+   font-family: FF DIN;
+   color: red;
+   margin:5px;
+   padding:2px;
+   font-size:25px;
+}
+
+
+.label1{
+   text-align: left;
+   margin:5px;
+   padding:2px;
+   color: white;
+   font-size:1.20em;
+   font-weight : bold;
+}
+
+.label2{
+   text-align:center;
+   margin:5px;
+   padding:2px;
+   color: #FAAC58;
+   font-size:1.20em;
+   font-weight : bold;
+}
 
 #rxMsg{
-	height:130px; 
+	width: 100%;
    align: center;
    margin-top: 5px;
    text-align: left;
-   color: white;
-   background: red;
+   color: black;
 }
 
 .tbButton{
-	width:100%;
 	positon:center;
 	margin:0px;
 	padding:0px;
