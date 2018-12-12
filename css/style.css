@@ -16,7 +16,7 @@ html, body {
 #table-container{
 	width: 1015px;
 	height: 250px;
-	margin-top: 20px;
+	margin-top: 0px;
 }
 
 #stater{
@@ -25,7 +25,7 @@ html, body {
    font-weight : bold;
    font-family: FF DIN;
    color       : yellow;
-   text-shadow: 0 0 5px #fff,
+   text-shadow: 0 0 2px #fff,
          0 0 20px #fff,
          0 0 30px #fff,
          0 0 40px #ff8000,
@@ -39,7 +39,7 @@ html, body {
 #subtitle{
 	font-weight: bold;
    font-family: FF DIN;
-   color: red;
+   color: #FE9A2E;
    margin:5px;
    padding:2px;
    font-size:25px;
@@ -113,7 +113,7 @@ html, body {
 #canvas_box{
 	width: 1015px;
 	height: 300px;
-	margin-top: -10px;
+	margin-top: 0px;
 }
 
 #oscope{
@@ -131,6 +131,7 @@ html, body {
 	height: 45px;
 	margin-top: -550px;
 	margin-left: 902px;
+	background: #DF7401;
 }
 
 #btnStop{
@@ -139,6 +140,7 @@ html, body {
 	height: 45px;
 	margin-top: -500px;
 	margin-left: 902px;
+	background: #FE9A2E;
 }
 
 #btnStart1{
@@ -147,6 +149,7 @@ html, body {
 	height: 45px;
 	margin-top: -450px;
 	margin-left: 902px;
+	background: #DF7401;
 }
 
 #btnStop1{
@@ -155,6 +158,7 @@ html, body {
 	height: 45px;
 	margin-top: -400px;
 	margin-left: 902px;
+	background: #FE9A2E;
 }
 
 #btnRestart{
@@ -163,6 +167,8 @@ html, body {
 	height: 45px;
 	margin-top: -350px;
 	margin-left: 902px;
+	background: #424242;
+	color: white;
 }
 
 #btnNoVac{
@@ -171,9 +177,11 @@ html, body {
 	height: 45px;
 	margin-top: -300px;
 	margin-left: 902px;
+	background: #585858;
+	color: white;
 }
 
 .gaugeBox{
 	position: relative;
-	margin-top: 5px;
+	margin-top: 15px;
 }
