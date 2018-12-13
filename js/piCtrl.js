@@ -104,11 +104,13 @@ function readDHT22(){
 	dhtData[0].values.push(getData1);
 	dhtData[1].values.push(getData2);
 
-/*
-	var str = "ROOM [405] : Temperature = " + dhtTemp+ " \260C";
-	str += "Humidity = " +  dhtHumi + "% : " + tmpDate.toString();
-	document.getElementById("title").innerHTML = str;
-*/
+	try{
+		var str = "ROOM [405] : Temperature = " + dhtTemp+ " \260C : ";
+		str += "Humidity = " +  dhtHumi + "%"+"\n" + tmpDate.toString();
+		document.getElementById("title").innerHTML = str;
+	} catch ( err){
+		console.log(err.message);
+	}
 
   d3.select('#chart svg')
     .datum(dhtData)
