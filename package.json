@@ -4,11 +4,11 @@
 	"version": "1.0.0",
 	"license": "MIT",
 	"window": {
-		"title": "node-webkit demo",
+		"title": "DHT Graph",
 		"toolbar": false,
 		"frame": false,
 		"show": true,
-		"fullscreen": false,
+		"fullscreen": true,
 		"width": 480,
 		"height": 320,
 		"position": "center",

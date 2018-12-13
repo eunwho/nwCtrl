@@ -5,7 +5,13 @@ var dataCount = 0;
 var dataPoints1 = [];
 var dataPoints2 = [];
 
-require('nw.gui').Window.get().showDevTools();
+//require('nw.gui').Window.get().showDevTools();
+
+var gui = require('nw.gui');
+
+// gui.Window.get().showDevTools();
+
+var win = gui.Window.get();
 
 var Promise = require('promise');
 var fs = require('fs');
@@ -41,147 +47,87 @@ function btnExit(){
    process.exit(0);
 }
 
+var chart = nv.models.lineWithFocusChart();
+
+chart.xAxis
+	// .tickFormat(d3.format(',f'));
+   .tickFormat(function(d) { 
+		return d3.time.format('%X')(new Date(d));
+	});
+
+chart.x2Axis
+	// .tickFormat(d3.format(',f'));
+   .tickFormat(function(d) { 
+		return d3.time.format('%c')(new Date(d));
+	});
+
+chart.yAxis
+	.tickFormat(d3.format(',.1f'));
+
+chart.y2Axis
+	.tickFormat(d3.format(',.1f'));
+
+chart.yDomain([-5,100]);
+
+chart.color(['red','green','yellow']);
+
+var tmp = new Date();
+
+var dhtData = [ {"key": "Temperature","values":[{"x":tmp,"y": 0},{"x":tmp+1000, "y":10}]},
+	{"key": "Humidity"   ,"values":[{"x":tmp,"y":10},{"x":tmp+1000, "y":20}]}
+];
+
 function readDHT22(){
 	var readout = dht.read();
 
+	var dhtSensor;
+	var getData1 = {"x":0,"y":0};
+	var getData2 = {"x":0,"y":0};
+
+	var tmpDate = new Date();
+
 	dhtTemp = Number(readout.temperature.toFixed(2));
 	dhtHumi = Number(readout.humidity.toFixed(2));
-	updateGauge(dhtTemp, dhtHumi);
+
+	dhtTemp = ( 100 < dhtTemp ) ? 100 : dhtTemp;
+	dhtTemp = ( 0   > dhtTemp ) ? 0   : dhtTemp;
+
+	dhtHumi = ( 100 < dhtHumi ) ? 100 : dhtHumi;
+	dhtHumi = ( 0   > dhtHumi ) ? 0   : dhtHumi;
+ 
+	getData1.x = tmpDate;
+	getData1.y = dhtTemp;
+
+	getData2.x = tmpDate;
+	getData2.y = dhtHumi;
+	
+	dhtData[0].values.push(getData1);
+	dhtData[1].values.push(getData2);
+
+/*
+	var str = "ROOM [405] : Temperature = " + dhtTemp+ " \260C";
+	str += "Humidity = " +  dhtHumi + "% : " + tmpDate.toString();
+	document.getElementById("title").innerHTML = str;
+*/
+
+  d3.select('#chart svg')
+    .datum(dhtData)
+    .transition().duration(500)
+    .call(chart)
+    ;
+
+	chart.update;
+
 	setTimeout(readDHT22, 3000);
 }
 
 readDHT22( );
 
-window.onload = function () {
-
-var chart = new CanvasJS.Chart("chartContainer", {
-	zoomEnabled: true,
-	title: {
-		text: "Temperature and Humidity House #1"
-	},
-	axisX: {
-		title: "chart updates every 3 secs"
-	},
-
-	axisY:{suffix: "\260C", title: "Temperature"},
-	toolTip: {shared: true},
-	legend: {
-		cursor:"pointer",
-		verticalAlign: "top",
-		fontSize: 10,
-		fontColor: "dimGrey",
-		itemclick : toggleDataSeries
-	},
-	data: [{ 
-		type: "line",
-		xValueType: "dateTime",
-		yValueFormatString: "##.0\260C",
-		xValueFormatString: "Y:MMM:DD DDD hh:mm:ss TT",
-		showInLegend: true,
-		name: "Temperature",
-		dataPoints: dataPoints1
-		},
-		{				
-		type: "line",
-		xValueType: "dateTime",
-		xValueFormatString: "Y:MMM:DD DDD hh:mm:ss TT",
-		yValueFormatString: "##.0",
-		showInLegend: true,
-		name: "Humidity",
-		dataPoints: dataPoints2
-	}]
-});
-
-function toggleDataSeries(e) {
-	if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
-		e.dataSeries.visible = false;
-	}
-	else {
-		e.dataSeries.visible = true;
-	}
-	chart.render();
-}
-
-var updateInterval = 3000;
-// initial value
-
 
 const YEAR_COUNT = 175200;		// 365 * 24 * 60 / 3
 
-function updateChart( ) {
-
-	var time = new Date();
-	dataPoints1.push({
-		x: time,
-		y: dhtTemp 
-	});
-
-	dataPoints2.push({
-		x: time,
-		y: dhtHumi 
-	});
-
-	dataCount ++;
-	if (YEAR_COUNT < dataCount){
-		dataCount = YEAR_COUNT;
-		dataPoints1.shift();
-		dataPoints2.shift();
- 	}
-
-	// updating legend text with  updated with y Value 
-	chart.options.data[0].legendText = " Temperature : " + dhtTemp;
-	chart.options.data[1].legendText = " Humidity : " + dhtHumi + " : " + time.toLocaleDateString(); 
-	chart.render();
-}
-
-// generates first set of dataPoints 
-updateChart();	
-setInterval(function(){updateChart()}, updateInterval);
-
-}
-
-function initTempGauge(gId){
-   var a = 'canvas[id=' + gId + ']';
-   $(a).attr('data-units',"\260C");
-/*   $(a).attr('data-title',"Temperature"); */
-   $(a).attr('data-min-value',-50);
-   $(a).attr('data-max-value',50);
-   $(a).attr('data-major-ticks',[-50,-25,0,25,50]);
-   $(a).attr('data-minor-ticks',10);
-   $(a).attr('data-stroke-ticks',true);
-   $(a).attr('data-ticks-width',15);
-   $(a).attr('data-highlights','[{"from":-50, "to": 0, "color": "rgba(0,255,0, .3)"},{"from":0,"to":50,"color":"rgba(255,0,0,.3)"}]');
-/*
-   $(a).attr('data-ticks-width-minor',7.5);	
-
-   $(a).attr('data-color-major-ticks',"#ffe66a");
-   $(a).attr('data-color-minor-ticks',"#ffe66a");
-   $(a).attr('data-color-title',"#eee");
-   $(a).attr('data-color-units',"#ccc");
-   $(a).attr('data-color-numbers',"#eee");
-   $(a).attr('data-color-plate',"#2465c0");
-   $(a).attr('data-color-plate-end',"#327ac0");
-   $(a).attr('data-border-shadow-width',0);
-   $(a).attr('data-borders',false);
-   $(a).attr('data-borders-radius',10);
-   $(a).attr('data-needle-type',"arrow");
-   $(a).attr('data-needle-width',3);
-   $(a).attr('data-animation-duration',1500);
-   $(a).attr('data-animation-rule',"linear");
-   $(a).attr('data-color-needle',"#222");
-   $(a).attr('data-color-needle-end',"#222");
-   $(a).attr('data-color-bar-progress',"#327ac0");
-
-   $(a).attr('data-color-bar',"#f5f5f5");
-   $(a).attr('data-bar-stroke',0);
-   $(a).attr('data-bar-width',8);
-   $(a).attr('data-bar-begin-circle',false);
-*/
-}
-
 $("document").ready(function() {
 //   if (oscope) oscope.init();
-	initTempGauge("gauge1");
 });
 
 process.on('SIGTERM', function () {
@@ -197,14 +143,18 @@ process.on('exit', function () {
     process.exit(0);
 });
 
-function updateGauge(gaugeData1,gaugeData2){
-   try{
-      $('canvas[id="gauge1"]').attr('data-value', (gaugeData1));
-      $('canvas[id="gauge2"]').attr('data-value', (gaugeData2));
-   }catch(err){
-      console.log('err updateGauge ',err.message);
-   }
-}
+//--- d3 line chart proc
+
+win.on("loaded",function(){
+
+	var tmpDate = new Date();
+
+	var str = "ROOM [405] : Temperature = " + dhtTemp+ " \260C";
+	str += "Humidity = " +  dhtHumi + "% : " + tmpDate.toString();
+	document.getElementById("title").innerHTML = str;
+
+});
+
 
 
 
