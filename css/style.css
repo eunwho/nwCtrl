@@ -167,8 +167,7 @@ html, body {
 	height: 45px;
 	margin-top: -350px;
 	margin-left: 902px;
-	background: #424242;
-	color: white;
+	background: #DF7401;
 }
 
 #btnNoVac{
@@ -177,8 +176,7 @@ html, body {
 	height: 45px;
 	margin-top: -300px;
 	margin-left: 902px;
-	background: #585858;
-	color: white;
+	background: #FE9A2E;
 }
 
 .gaugeBox{

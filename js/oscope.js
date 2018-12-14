@@ -1,4 +1,4 @@
-const GRAPH_MAX_COUNT= 0.1 * 60 * 60; // 1 hour count
+const GRAPH_MAX_COUNT= 3 * 60 * 60; // 1 hour count
 
 var oscope = (function() {
   var m_canvas;
