@@ -430,7 +430,7 @@ function simTraceData(){
 		updateGauge(traceData.channel);
 		document.getElementById('stater').innerHTML = ( 0 !== machineState ) ? '동작중' : '대기중';    
 		document.getElementById('clock1').innerHTML = nowClock;
-		if((machineState === 1 )&&(gTripState === 0)){ 
+		if(machineState === 1 ){ 
 
 			var tempTime = new Date();
 			var elapedTime = tempTime - graphStartTime;
