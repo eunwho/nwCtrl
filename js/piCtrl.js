@@ -1,6 +1,10 @@
 //"use strict"
 const GRAPH_MAX_COUNT = 3 * 60 * 60;
 
+const MOTOR_TRIP_MSG = '모터 과부하 트립 : 팬모타, 유압모터, 수중모터';
+const HEAT_TRIP_MSG 	= '온도제어기 트립발생';
+const FLOW_TRIP_MSG 	= '플로센서 이상 발생';
+
 var startTime = new Date();
 var graphStartTime = new Date();
 
@@ -15,9 +19,9 @@ var coefPres = [[690,900],[0,10]]; 			// 1V --> 0.0Mpa --> 690, 5V --> 2.0 Mpa -
 var coefVacu = [[690,900],[0,-100]]; 		// 1V --> 0.0Mpa --> 690, 5V --> -0.1Mpa --> 900,
 
 var dataFileName ='record0.dat';
-var tripLogFileName = 'autoClaveTrip.log';
+var tripLogFileName = './err/autoClaveTrip.log';
 
-require('nw.gui').Window.get().showDevTools();
+// require('nw.gui').Window.get().showDevTools();
 
 var Promise = require('promise');
 var fs = require('fs');
@@ -26,12 +30,6 @@ var reloadWatcher=fs.watch('./',function(){
 	location.reload();
 	reloadWatcher.close();
 });
-
-/*
-const EventEmitter = require('events');
-class MyEmitter extends EventEmitter {};
-const myEmitter = new MyEmitter();
-*/
 
 var path= require('path');
 var i2c = require('i2c-bus');
@@ -223,59 +221,15 @@ function getAdcValue(){
 	}
 }
 
+function startProc ( byteInput ){
 
-function checkMotor(input){
 	try{
-	   var temp =  ( input & 4 );
-		
-		if( 0 !== temp ){
-			motorErr = 0;
-		} else if(motorErr === 0){
-			motorErr = 1;
-			var textOut ='모터 과부하 트립 : 팬모타, 유압모터, 수중모터';
-
-			var clockStamp  = new Date();
-
-			var d = clockStamp; 
-			 d += ':\t'+textOut+'\r\n';
-
-			errMsgOut(d);
-			console.log(d);
-			console.log(tripLogFileName);
-/*
-		  	fs.appendFile(tripLogFileName,d,'utf8',function(err){
-				if (err) {
-      			throw err;
-    			}
-			});
-*/
-		  	fs.appendFileSync(tripLogFileName,d,'utf8');
-
-			if( gTripState === 0 ){
-				if(dataFileName === 'record0.dat'){
-					dataFileName = getFileName();					
-			 	}
-				console.log(dataFileName);
-				saveGraphImage(dataFileName);  
-			}
-			gTripState = 1;
-		}
-	} catch(err){
-		console.log(err.message);
-	}
-}
-
-function digitalInputProc( byteInput ){
-
-	var temp = 1;
-	
 	if ( 255 < byteInput ){
 		console.log('input error = '+byteInput);
 		return;
 	}
 
-	inMcp23017[0] = byteInput;
-   temp =  (inMcp23017[0] & 1 );
+   var temp =  ( byteInput & 1 );
 
 	if( temp !== 0 ){
 		if ( machineState !== 0 ) {  //리
@@ -298,71 +252,127 @@ function digitalInputProc( byteInput ){
 		machineState = 1;	// machine running
 		recordSate = 1;
 	} 
+	}catch(err){
+		console.log(err.message);
+	}
+}
+
 
 //--- end of start input process
 
-	temp =  (inMcp23017[0] & 2 );
+function exitInProc( input ){
+	var temp =  (input & 2 );
 	if( 0 !== temp ){
 		poweroff = 0;
 	} else {
 		poweroff++;
-		if(poweroff > 2 ) shutdown ();
+		if(poweroff > 2 ){
+			gracefulShutdown( );
+		}
 	}
+}
 		
-//--- check motor error
+function checkMotor(input){
+	try{
+	   var temp =  ( input & 4 );
+		
+		if( 0 !== temp ){
+			motorErr = 0;
+			return 0;
+		} else if(motorErr === 0){
+			motorErr = 1;
+			var d  = new Date();
+			 d += ':\t' + MOTOR_TRIP_MSG + '\r\n';
+			errMsgOut(d);
 
-   temp =  inMcp23017[0];	
-	checkMotor(temp);
+			try{
+		      fs.appendFileSync(tripLogFileName,d);
+			}catch(err){
+				console.log(err.message);
+			}
+
+			if( gTripState === 0 ){
+				if(dataFileName === 'record0.dat'){
+					dataFileName = getFileName();					
+			 	}
+				console.log(dataFileName);
+				saveGraphImage(dataFileName);  
+			}
+			gTripState = 1;
+			return 1;
+		}
+	} catch(err){
+		document.write ("catch caught " + err.message + "<br/>");
+	}
+}
+
 //--- check heat Error
  
-  temp =  (inMcp23017[0] & 8 );
+function checkHeat(input){
 
-	if( 0 !== temp ){
-		heatErr = 0;
-	} else {
-		heatErr++;
-		if(2 === heatErr){
-			var textOut ='온도제어기 트립발생';
-			var d = new Date()+':\t'+textOut+'\r\n';
-	      fs.appendFile(tripLogFileName,d,'utf8',function(err){
-				if (err) {
-					console.log('Err appendFileSync() tripLogFile : '+ err);
-     				throw 'could not open file: ' + err;
-   			}
-				if( gTripState === 0 ) saveGraphImage(dataFileName);  
-				gTripState = 1;
-				errMsgOut(d);
-			});
-		} else if ( heatErr > 2 ){
-			gTripState = 1;
-			heatErr = 3;
-		}
-	}
+	try{
+		var temp = (input & 8 );
 
-//--- check flowSensError
-   temp =  (inMcp23017[0] & 16 );
-	if( 0 !== temp ){
-		flowSensErr = 0;
-	} else {
-		flowSensErr++;
-		if( 2 == flowSensErr){
-			var textOut ='플로센서 이상 발생';
-			var d = new Date()+':\t'+textOut+'\r\n';
-	      fs.appendFile(tripLogFileName,d,'utf8',function(err){
-				if (err) {
-					console.log('Err appendFileSync() :'+ err);
-     				throw err;
-  				}
-			});
-			if( gTripState === 0 ) saveGraphImage(dataFileName);  
-			gTripState = 1;
+		if( 0 !== temp ){
+			heatErr = 0;
+		} else if(heatErr === 0){
+			heatErr = 1;
+			var d = (new Date()) + ':\t' + HEAT_TRIP_MSG + '\r\n';
 			errMsgOut(d);
-		} else if ( flowSensErr > 2 ){
+
+			try{
+		      fs.appendFileSync(tripLogFileName,d);
+			}catch(err){
+				console.log(err.message);
+			}
+
+			if( gTripState === 0 ){
+				if(dataFileName === 'record0.dat'){
+					dataFileName = getFileName();					
+			 	}
+				console.log(dataFileName);
+				saveGraphImage(dataFileName);  
+			}
 			gTripState = 1;
-			flowSensErr = 3;
+			return 1;
 		}
-	} 
+	}catch(err){
+		console.log(err.message);
+	}
 }
+//--- check flowSensError
+
+function checkFlowSens(input){
+	try{
+   	var temp =  (input & 16 );
+
+		if( 0 !== temp ){
+			flowSensErr = 0;
+		} else if( flowSensErr === 0){
+			flowSensErr = 1;
+			var d = (new Date()) + ':\t' + FLOW_TRIP_MSG + '\r\n';
+			errMsgOut(d);
+			try{
+		      fs.appendFileSync(tripLogFileName,d);
+			}catch(err){
+				console.log(err.message);
+			}
+
+			if( gTripState === 0 ){
+				if(dataFileName === 'record0.dat'){
+					dataFileName = getFileName();					
+			 	}
+				console.log(dataFileName);
+				saveGraphImage(dataFileName);  
+			}
+			gTripState = 1;
+			return 1;
+		}
+	}catch(err){
+		console.log(err.message);
+	}
+}
+
 // return writeMcp23017(ADDR_OUT1,0,byte);
 function updateGauge(gaugeData){
 	try{
@@ -393,7 +403,7 @@ function simTraceData(){
 			traceData.channel[i] = temp;
 		}
 	}catch(err){
-		console.log("Err simTraceData() :  %s",err.message);
+		console.log("Err simTraceData() :  %s" + err.message );
 	}
 }
 
@@ -404,11 +414,12 @@ function simTraceData(){
 	var promise = readMcp23017(ADDR_IN1,0); 
   promise
   .then(function(byte){
-		try{
-			digitalInputProc(byte);
-		}catch(err){
-			console.log(err.message);
-		}
+		var input = byte;
+		startProc(input);
+		exitInProc(input);
+		checkMotor(input);
+		checkHeat(input);
+		checkFlowSens(input);
   }).catch(function(err){
     console.log(err.message);
   });
@@ -416,12 +427,9 @@ function simTraceData(){
 	try{ 
 
 		var nowClock = getClockStr();
-
 		updateGauge(traceData.channel);
-
-		document.getElementById('stater').innerHTML = (machineState === 1 ) ? '동작중' : '대기중';    
+		document.getElementById('stater').innerHTML = ( 0 !== machineState ) ? '동작중' : '대기중';    
 		document.getElementById('clock1').innerHTML = nowClock;
-
 		if((machineState === 1 )&&(gTripState === 0)){ 
 
 			var tempTime = new Date();
@@ -646,9 +654,7 @@ function errMsgOut(input){
 	   	document.getElementById('rxMsg').innerHTML = 'Error Message:';
 		}
 		var textA = document.getElementById('rxMsg').innerHTML;
-		// console.log('msgBoxCount=%d : textA = %s',msgBoxCount,textA);
-   	textA += input;
-		textA += '<br>';
+   	textA += input+'<br>';
 		document.getElementById('rxMsg').innerHTML = textA;
 	} catch(err){
 		console.log(err.message);
