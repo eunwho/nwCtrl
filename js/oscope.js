@@ -236,9 +236,12 @@ var oscope = (function() {
     ctx.fillText('진공',V_SITE,y);
 
     y = dy_offset;
-	ctx.textAlign="left"; 
-    ctx.fillStyle = "red";
 
+	ctx.textAlign="left"; 
+    ctx.fillStyle = "black";
+    ctx.fillText('3시간화면',T_SITE+70,y);
+
+    ctx.fillStyle = "red";
     ctx.fillText('200C',T_SITE,y);
     y += delta;
     ctx.fillText('150C',T_SITE,y);
@@ -365,11 +368,16 @@ var oscope = (function() {
 
   function writeTime(start, end){
 		try{
-      	m_context.fillStyle = "black";
       	m_context.textAlign="left"; 
-      	m_context.fillText(start,100,20);
+      	m_context.fillStyle = "white";
+  	   	m_context.fillRect( 150,10,300,10);    
+      	m_context.fillStyle = "black";
+      	m_context.fillText(start,150,20);
       	m_context.textAlign="right"; 
-      	m_context.fillText(end,690,20);
+      	m_context.fillStyle = "white";
+  	   	m_context.fillRect( 450,10,300,10);    
+       	m_context.fillStyle = "black";
+	     	m_context.fillText(end,690,20);
 		} catch(err){
 			alert("err oscope.writeTime()");
 		}
@@ -413,6 +421,8 @@ var oscope = (function() {
       x = x+ DELTA_X;
       m_context.fillStyle = "aqua";     
       m_context.fillText('진공6',x,Y_OFFSET);            
+
+
 		} catch(err){
 			alert("err oscope.writeLegend()");
 		}	
