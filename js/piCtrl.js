@@ -42,6 +42,7 @@ var gracefulShutdown = function() {
   }, 10*1000);
 }
 
+
 function btnExit(){
    console.log('\nShutting down, performing GPIO cleanup');
    process.exit(0);
@@ -106,15 +107,16 @@ function readDHT22(){
 
 	try{
 		var str = "ROOM [405] : Temperature = " + dhtTemp+ " \260C : ";
-		str += "Humidity = " +  dhtHumi + "%"+"\n" + tmpDate.toString();
+		str += "Humidity = " +  dhtHumi + "%"+"\n";
 		document.getElementById("title").innerHTML = str;
 	} catch ( err){
 		console.log(err.message);
 	}
 
+
   d3.select('#chart svg')
     .datum(dhtData)
-    .transition().duration(500)
+    .transition().duration(5)
     .call(chart)
     ;
 
@@ -151,12 +153,26 @@ win.on("loaded",function(){
 
 	var tmpDate = new Date();
 
+//	var str = "ROOM [405] : Temperature = " + dhtTemp+ " \260C";
+//	str += "Humidity = " +  dhtHumi + "% : " + tmpDate.toString();
+//	document.getElementById("title").innerHTML = str;
+
 	var str = "ROOM [405] : Temperature = " + dhtTemp+ " \260C";
-	str += "Humidity = " +  dhtHumi + "% : " + tmpDate.toString();
+	str += "Humidity = " +  dhtHumi + "% : ";
 	document.getElementById("title").innerHTML = str;
+
+	var str = tmpDate.toString();
+	document.getElementById("clock").innerHTML = str;
 
 });
 
+function btnExit(){
+   console.log('\nShutting down, performing GPIO cleanup');
+   process.exit(0);
+}
 
-
+process.on('exit', function () {
+    console.log('\nShutting down, performing GPIO cleanup');
+    process.exit(0);
+});
 

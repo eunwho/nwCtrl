@@ -5,6 +5,7 @@
 <link rel="shortcut icon" href="img/favicon.ico"/>
 <!--link href="css/nv.d3.min.css" rel="stylesheet"/-->
 <link href="css/nv.d3.css" rel="stylesheet"/>
+<link href="css/style.css" rel="stylesheet"/>
 <link href="css/w3.css" rel="stylesheet"/>
 
 <script src="js/d3.v3.min.js"></script>
@@ -12,14 +13,20 @@
 <script src="js/jquery.min.js"></script>
 <script src="js/piCtrl.js"></script>
 </head>
-<body>
-<div 
-	<p id="title"> Temperature & Humidity Room [405] </p>
-</div>
 
-<div id="chart">
-	<svg style="width:100%;height:280"></svg>
-</div>
+<body>
+
+	<div> 
+		<div id="title"> Temperature & Humidity Room [405] </div>
+		<div id="clock"> clock </div>
+		<div id="stopbox">
+			<button id="btnNoVac" onclick="btnExit()">동작정지</buttom>
+		</div>
+	</div>
+	<div id="chart">
+		<svg style=" width:100%; height:270; "></svg>
+	</div>
+
 </body>
 </html>
 

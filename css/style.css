@@ -18,4 +18,42 @@ svg {
   font-size: 12px;
 }
 
+#title {
+	margin-top: 5px;
+	width: 100%;
+	height: 22px;
+	text-align: center;
+	font-weight: bold;
+	font-size: 16px;
+}
 
+#clock{
+	width: 100%;
+	height: 22px;
+	margin-left: 180px;
+	font-size: 14px;
+}
+
+#stopbox{
+	margin-top: -15px;
+	margin-left: 30px;
+}
+
+#btnNoVac{
+	width: 100px;
+	height:25px;
+	display: inline-block;
+	border-radius: 0.35;
+	letter-spacing: 0.20em;
+	color: #fff;
+	background-color: #8ebebc;
+	border:2;
+	outline: 2;
+	line-height:12px; 
+	cursor: pointer;
+	text-align: center;
+}
+
+#chart{
+	margin-top: -10px;
+}
